@@ -55,7 +55,9 @@ Notes that apply to every task: `mago fmt` before any commit; all four gates cle
 
 - [ ] T015 Define the resource-map contribution: the package and every component publish
       `view_manager.asset.resource_map` entries; a theme re-values names and never introduces them
-      (FR-009, and the `Asset` helper throws on an unknown name)
+      (FR-009, and the `Asset` helper throws on an unknown name). Settle the exact asset path shape and
+      filenames under `public/theme/<theme>/` while doing so — assets are served from there, never from
+      a theme's `templates/` root
 - [ ] T016 Contribute the default theme's entries from `ConfigProvider` so that an application with no
       theme configuration resolves every asset name the shipped templates use
 

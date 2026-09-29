@@ -78,6 +78,9 @@ with later-wins (so `templates` and `resource_map` overrides are automatic), whi
 
 ## Asset name
 
+Asset files live under `public/` — `/public/theme/<theme>/…` — and **never** inside a theme's `templates/`
+root, which is not a served location. The exact path shape and filenames are still to be settled.
+
 | Field | Type | Rules |
 |---|---|---|
 | `name` | `non-empty-string` | Defined by a component; a fixed vocabulary. The `Asset` helper throws on anything unknown |

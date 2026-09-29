@@ -151,7 +151,9 @@ agreements, the four Mago gates, and the MSI floors in `webware-ci.json`.
 - **FR-007**: Every package that ships layouts or templates MUST ship a `default` theme.
 - **FR-008**: The active theme MUST be selectable by a configuration value alone.
 - **FR-009**: Assets MUST be resolved through laminas-view's asset helpers, with theme values
-  overriding entries in the resource map. No request-time asset middleware.
+  overriding entries in the resource map. No request-time asset middleware. Asset files MUST live under
+  `public/` (`/public/theme/<theme>/…`) and never inside a theme's `templates/` root, which is not a
+  served location.
 - **FR-010**: A theme MUST work without a build step. Markup and assets are the deliverables.
 - **FR-011**: Roots for application and client modules MUST be derivable from the PSR-4 namespaces
   registered for that module, with package roots declared by their own `ConfigProvider`.

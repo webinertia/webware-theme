@@ -4,19 +4,26 @@
 
 ## For a designer or developer refreshing a client's site
 
-A theme is a directory. Nothing is compiled, published or registered.
+A theme is a directory of templates plus the assets that go with it. Nothing is compiled, published or
+registered.
 
 ```
 templates/acme/                 # the theme; `acme` is the name
 ├── layout/default.phtml        # overrides the package's layout
-├── partials/nav.phtml          # overrides one partial
-└── assets/acme.css             # this theme's styling
+└── partials/nav.phtml          # overrides one partial
+
+public/theme/acme/              # this theme's assets, where they can be served
+└── css/acme.css
 ```
 
-1. Create the directory and copy into it only what the redesign changes. Anything you do not copy
-   continues to come from the component's `default` theme.
-2. Make the assets reachable: add their entries to the resource map (names are the ones the components
-   already use; you are changing values, not inventing names).
+Templates and assets live in different places because they are served differently: `templates/` is
+never a served location, so nothing under it can be requested by a browser.
+
+1. Create the theme directory under `templates/` and copy into it only what the redesign changes.
+   Anything you do not copy continues to come from the component's `default` theme.
+2. Put the assets under `public/theme/<theme>/` and point their **names** at them in the resource map
+   (the names are the ones the components already use; you are changing values, not inventing names).
+   The exact path shape and filenames are still to be settled.
 3. Activate it:
 
 ```php

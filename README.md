@@ -26,8 +26,9 @@ root, so a component's references to its own templates survive a theme change. R
 roots in order and falls back **per template**, so a theme that overrides one layout leaves every other
 template coming from `default`.
 
-That is the whole mechanism: a redesign is a directory of files and the assets it needs, not a fork of
-every package. Nothing is compiled, published or watched.
+That is the whole mechanism: a redesign is a directory of templates plus the assets that go with it, not
+a fork of every package. Templates resolve from `templates/`; assets are served from `public/theme/<theme>/`
+(a theme's `templates/` directory is never a served location); nothing is compiled, published or watched.
 
 ## Installation
 
