@@ -14,25 +14,32 @@ declare(strict_types=1);
 
 namespace WebwareTest\Theme;
 
+use Laminas\View\Resolver\AggregateResolver;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversMethod;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Webware\Theme\ConfigProvider;
+use Webware\Theme\Resolver\Container\AggregateResolverFactory;
+use Webware\Theme\Resolver\Container\ThemeResolverFactory;
+use Webware\Theme\Resolver\ThemeResolver;
 
 #[CoversClass(ConfigProvider::class)]
 #[CoversMethod(ConfigProvider::class, '__invoke')]
 final class ConfigProviderTest extends TestCase
 {
     #[Test]
-    public function providesAnEmptyDependencyFactoryMap(): void
+    public function providesTheResolverAndTheAggregateFactories(): void
     {
         $expected = [
             'dependencies' => [
-                'factories' => [],
+                'factories' => [
+                    ThemeResolver::class     => ThemeResolverFactory::class,
+                    AggregateResolver::class => AggregateResolverFactory::class,
+                ],
             ],
         ];
 
-        self::assertSame($expected, new ConfigProvider()->__invoke());
+        static::assertSame($expected, new ConfigProvider()->__invoke());
     }
 }
