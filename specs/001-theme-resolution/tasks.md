@@ -66,22 +66,30 @@ Notes that apply to every task: `mago fmt` before any commit; all four gates cle
 - [ ] T018 Confirm the convention against an existing package (webware-navigation's templates) and
       record any divergence rather than moving files in a package outside this feature's scope
 
-## Phase 6 — Consumer-side work, deliberately not in this list
+## Phase 6 — The htmx configuration prerequisite (FR-012)
 
-The work the convention *enables* elsewhere is not this feature's to do:
+- [ ] T019 Make webware-htmx read **one key per value** for the body and the layout, whose values are
+      theme-resolvable template names, replacing the five-key lookup and the package-published
+      `templates.map['body::default']` entry. This is the only part of webinertia/webware-htmx#21 this
+      feature needs: without it a theme has no name to resolve for the body
+- [ ] T020 Integration-test that the body name resolves **through the resolver** rather than through a map
+      entry the package publishes itself, and that a theme overriding only the layout still gets the
+      default body
+- [ ] T021 Keep webware-htmx free of a dependency on this package: it reads the configured name and hands
+      it to the aggregate resolver, whichever package supplies it
 
-- Collapsing webware-htmx's five body/layout keys (`templates.layout`, `templates.body`,
-  `templates.default_layout`, `templates.default_body`, `view_manager.default_layout`) to one name each
+## Phase 7 — Consumer-side work, deliberately not in this list
+
+Everything else in webinertia/webware-htmx#21 is work the convention *enables* but does not depend on:
+
 - Extracting the IMS shell out of `webware-htmx/templates/body/default.phtml` into an `ims` theme, and
   shipping a helper-clean `default` body in its place
 - Correcting webware-htmx's override documentation (its README states the opposite of how the config
   aggregator merges)
+- Renderer packaging, the `TemplateRendererInterface` alias, and how a team on another client-scripting
+  approach is served
 
-All three are tracked in **webinertia/webware-htmx#21**. This feature's obligation ends at the convention:
-theme-less names, a `default` theme per package, and per-template fallback. Task numbering continues in
-Phase 7 rather than renumbering what follows.
-
-## Phase 7 — Tests
+## Phase 8 — Tests
 
 - [ ] T022 Unit: `test/unit/Resolver/ThemeResolverTest.php` — a theme hit, a per-template fallback to
       `default`, an unknown name returning `false`, and name validation rejecting separators
@@ -91,7 +99,7 @@ Phase 7 rather than renumbering what follows.
 - [ ] T025 Keep `test/integration/ConfigProviderWiringTest.php` green: it asserts
       `extra.laminas.config-provider` agrees with the namespace
 
-## Phase 8 — Spec-kit tracking
+## Phase 9 — Spec-kit tracking
 
 - [ ] T026 Keep `.specify/` and `/specs/` tracked in this repository (deliberate divergence from the
       preset's alignment tasks, which add both to `.gitignore`): this component's development is

@@ -10,6 +10,11 @@ Packages contribute roots and asset names through their `ConfigProvider`; applic
 modules) contribute theirs as configuration, with module roots derivable from registered PSR-4
 namespaces. No middleware, no build step, no database.
 
+One consumer change is a **prerequisite**, because a resolver can only resolve a name it is given: the
+package that layers the body and layout (webware-htmx) must name each with one configuration value
+(Phase 6, T019–T021 of `tasks.md`, and the required subset of webinertia/webware-htmx#21). Everything else
+in that RFC is enabled by this feature's convention but not required by it.
+
 ## Technical Context
 
 - **PHP**: `~8.4.1 || ~8.5.0` (matches the fleet; tooling platform `8.4.99`)

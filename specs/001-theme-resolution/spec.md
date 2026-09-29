@@ -155,10 +155,13 @@ agreements, the four Mago gates, and the MSI floors in `webware-ci.json`.
 - **FR-010**: A theme MUST work without a build step. Markup and assets are the deliverables.
 - **FR-011**: Roots for application and client modules MUST be derivable from the PSR-4 namespaces
   registered for that module, with package roots declared by their own `ConfigProvider`.
-- **FR-012**: Template names MUST be resolvable whichever package owns the rendering, so a package that
-  layers a body and a layout (webware-htmx) can name its templates through the theme. The configuration
-  change that follows for that package is **its** work, tracked in webinertia/webware-htmx#21, and is not
-  a requirement of this feature.
+- **FR-012**: The body and the layout MUST each be named by **one** configuration value, and that value
+  MUST be a theme-resolvable template name (`body`, `layout`) rather than a path the owning package
+  publishes as a map entry. This is what lets a theme point at a body template at all, so the collapse of
+  webware-htmx's five-key lookup (`templates.layout`, `templates.body`, `templates.default_layout`,
+  `templates.default_body`, `view_manager.default_layout`) is a **prerequisite of this feature** — it is
+  the one part of webinertia/webware-htmx#21 that is required here. The package reads the name and hands
+  it to whatever resolver is registered in the aggregate; it does not depend on this package to do so.
 - **FR-013**: The shipped `default` theme MUST call only helpers that the package's own dependencies
   provide.
 - **FR-014**: A theme's templates MUST be able to call helpers contributed by any installed module's
