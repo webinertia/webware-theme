@@ -56,13 +56,18 @@ Two things are decisions rather than open code:
 
 - **Module order** for a namespace served by more than one module — presumably the application's own
   module first.
-- **Namespace-keyed paths or theme-keyed maps** — the two constructions worth prototyping, since each
-  decides whether the active theme is a build-time or a lookup-time fact:
+- **Namespace-keyed paths or theme-keyed maps** — the constructions worth prototyping, since each decides
+  whether the active theme is a build-time or a lookup-time fact:
   - *namespace-keyed paths*: mezzio's own `templates.paths` shape, with the active theme's directory
     prepended per namespace (walked per lookup).
   - *theme-keyed maps*: `[theme][address] => path` for every theme at once, with the active theme
     injected into the resolver, which falls back to `default` per address (`research.md` has the lookup
-    measurements).
+    measurements). Lookup-time theme.
+  - *merge-last theme map*: a theme ships its overrides as an address-keyed map and is merged **last**, so
+    it wins by the same later-wins rule that makes `templates.map` an override channel today. Every
+    address the theme does not list keeps the earlier entry, so per-address fallback is the absence of a
+    key — no fallback logic at all — and the runtime stays a plain `TemplateMapResolver`. Build-time
+    theme.
 
   The key of a map is already the address the renderer asks for, which is why the map is the override
   point today; the key of a path list is the namespace, and its integer-keyed lists append in provider

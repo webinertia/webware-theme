@@ -51,8 +51,14 @@ be injected from configuration.
 - [ ] T036 Prototype **theme-keyed maps** (`[theme][address] => path` for every theme at once, active
       theme injected into the resolver, `default` as the per-address fallback). Confirm the active theme
       becomes a lookup-time fact, and measure what building the maps costs (directory scan or manifest)
-- [ ] T037 Write down which won and why, then fold it into the resolver tasks above rather than leaving
-      two constructions in the code
+- [ ] T037 Prototype **merge-last theme map**: a theme ships its overrides as an address-keyed map, and a
+      provider or post-processor registered last merges it over the rest, so the theme wins by the same
+      rule that makes `templates.map` an override channel today — and every address the theme does not
+      list keeps its earlier entry, which is per-address fallback for free. Runtime stays a plain
+      `TemplateMapResolver`: no custom resolver, no stats. Confirm what the rebuild costs at config time
+      and whether the config cache absorbs it
+- [ ] T038 Write down which won and why (build-time theme vs lookup-time theme is the real fork), then
+      fold it into the resolver tasks above rather than leaving two constructions in the code
 
 ## Phase 3 — Configuration
 
