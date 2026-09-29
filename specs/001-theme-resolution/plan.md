@@ -20,6 +20,11 @@ in that RFC is enabled by this feature's convention but not required by it.
 - **PHP**: `~8.4.1 || ~8.5.0` (matches the fleet; tooling platform `8.4.99`)
 - **Runtime deps**: `laminas/laminas-view ^3.0`, `psr/container ^2.0`. `mezzio/mezzio-laminasviewrenderer`
   and `webware/webware-htmx` stay consumers, not dependencies.
+- **Console (conditional)**: if the installer turns out to be a command in this package (T034),
+  `webware/webware-console` becomes a dependency — as it is for webware-migration — and the guard rule for
+  `Console\` applies: a `final` class named `*Command` carrying
+  `#[Symfony\Component\Console\Attribute\AsCommand]`, directly in `Console\`, with its factory in
+  `Console\Container\`.
 - **Dev deps**: `webware/webware-tools ^1.0.0-beta.5` (the first release shipping
   `agent-working-agreements.md`), PHPUnit 13.3, Infection, PHPBench, roave BC-check.
 - **Tooling**: mago 1.50.0 (pinned by `webware-tools`), four gates in CI
@@ -81,6 +86,12 @@ src/
 ├── Resolver/
 │   ├── ThemeResolver.php           # ordered root chain + per-template fallback, memoized
 │   └── Container/ThemeResolverFactory.php
+├── Installer/
+│   ├── ThemeInstaller.php          # creates and manages a theme's assets under public/theme/<theme>/
+│   └── Container/ThemeInstallerFactory.php
+├── Console/                        # only if the installer is a command here (T034)
+│   ├── InstallThemeCommand.php     # final, *Command, #[AsCommand] -- the Console\ guard rule
+│   └── Container/InstallThemeCommandFactory.php
 └── Exception/
     └── ThemeNotConfiguredException.php
 templates/                          # only if this package ships markup of its own
@@ -92,9 +103,10 @@ test/
     └── ThemeResolutionTest.php          # real template files across two roots and a fallback
 ```
 
-The implementation is deliberately smaller than the doc set: a contract, a resolver, and wiring. There
-is no renderer subclass — `webware-htmx` keeps `View\LaminasRenderer` for body/layout layering, and
-this package only answers "which file is this template name?".
+The implementation is deliberately smaller than the doc set: a contract, a resolver, an installer and
+wiring. There is no renderer subclass — `webware-htmx` keeps `View\LaminasRenderer` for body/layout
+layering, and this package only answers "which file is this template name?" and "what does a theme's
+installed asset set look like?".
 
 ## Complexity Tracking
 

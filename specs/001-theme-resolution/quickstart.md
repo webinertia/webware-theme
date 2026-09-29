@@ -21,9 +21,10 @@ never a served location, so nothing under it can be requested by a browser.
 
 1. Create the theme directory under `templates/` and copy into it only what the redesign changes.
    Anything you do not copy continues to come from the component's `default` theme.
-2. Put the assets under `public/theme/<theme>/` and point their **names** at them in the resource map
-   (the names are the ones the components already use; you are changing values, not inventing names).
-   The exact path shape and filenames are still to be settled.
+2. Its assets are the installer's job, not yours: run the theme installer and they appear under
+   `public/theme/<theme>/` (exact path shape and filenames still to be settled), with their **names**
+   pointed at them in the resource map — the names are the ones the components already use; you are
+   changing values, not inventing names.
 3. Activate it:
 
 ```php

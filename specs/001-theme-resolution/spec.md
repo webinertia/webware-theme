@@ -168,6 +168,10 @@ agreements, the four Mago gates, and the MSI floors in `webware-ci.json`.
   provide.
 - **FR-014**: A theme's templates MUST be able to call helpers contributed by any installed module's
   `ConfigProvider`.
+- **FR-015**: Creating and managing a theme's asset files MUST be the theme installer's responsibility
+  rather than a manual task. Running the installer is what puts a theme's assets under
+  `public/theme/<theme>/`; a developer never creates them by hand, and the components' `default` themes
+  need no manual asset step.
 
 ### Key Entities
 

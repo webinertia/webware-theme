@@ -61,6 +61,21 @@ Notes that apply to every task: `mago fmt` before any commit; all four gates cle
 - [ ] T016 Contribute the default theme's entries from `ConfigProvider` so that an application with no
       theme configuration resolves every asset name the shipped templates use
 
+## Phase 4b — Theme installer (FR-015)
+
+Task IDs are assigned in the order they were added, so this phase carries the next free numbers rather
+than displacing the ones below it.
+
+- [ ] T032 Implement the theme installer: given a theme, materialise its assets under
+      `public/theme/<theme>/` from the theme's own source. Nothing here is a build step — it is the one
+      place that writes into a served location
+- [ ] T033 Decide and record how far "manage" goes: create only, update when the theme's assets change,
+      and what happens on uninstall. Whichever way it goes, the installer owns it rather than leaving
+      stale files in `public/`
+- [ ] T034 Decide whether the installer is a console command in this package (registered under
+      `Webware\Console\ConsoleInterface::class`, which makes `webware/webware-console` a dependency, as
+      it is for webware-migration) or an application-level command. Record the choice in `plan.md`
+
 ## Phase 5 — The convention in the packages
 
 - [ ] T017 Define the `templates/<theme>/` layout convention for packages and write it into the

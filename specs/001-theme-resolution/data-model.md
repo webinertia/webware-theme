@@ -76,6 +76,23 @@ with later-wins (so `templates` and `resource_map` overrides are automatic), whi
 | Memoization | resolved names are remembered per instance; nothing above memoizes (`research.md`) |
 | Failure | never throws for an unknown name — throwing would break the aggregate's fallback |
 
+## Theme installer
+
+Creating and managing a theme's asset files is the installer's job, not the developer's: a redesign does
+not hand-write `public/theme/<theme>/…` any more than it hand-writes a lock file.
+
+| Responsibility | Detail |
+|---|---|
+| Create | materialise a theme's assets under `public/theme/<theme>/` from the theme's own source |
+| Manage | keep them in step with what the theme ships, including removing what it no longer ships |
+| Scaffold | seed a new theme from `default`, so a new `templates/<name>/` plus its assets start from something that renders |
+
+Still open: how far "manage" goes (create only, update on change, remove on uninstall), and whether the
+installer is a console command in this package or lives in the application. If it is a command here, the
+fleet's console contract applies — registered under `Webware\Console\ConsoleInterface::class` with
+lazy resolution — which makes `webware/webware-console` a dependency of this package, as it is for
+`webware/webware-migration`.
+
 ## Asset name
 
 Asset files live under `public/` — `/public/theme/<theme>/…` — and **never** inside a theme's `templates/`
