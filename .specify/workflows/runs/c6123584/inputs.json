@@ -1,0 +1,7 @@
+{
+  "inputs": {
+    "spec": "Resolve themes for laminas-view template names: a theme is a directory under a package's templates/, resolved by name with per-template fallback to the default theme every package ships.",
+    "integration": "copilot",
+    "scope": "full"
+  }
+}

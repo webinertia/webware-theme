@@ -11,6 +11,4 @@
 /vendor/
 /.vscode
 /mago-results.txt
-/.specify/
-/specs/
 *:Zone.Identifier
