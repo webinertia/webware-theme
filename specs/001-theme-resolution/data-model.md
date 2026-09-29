@@ -97,7 +97,7 @@ with later-wins (so `templates` and `resource_map` overrides are automatic), whi
 
 | Responsibility | Detail |
 |---|---|
-| Input | a theme-less template name (`body`, `layout/default`, `partials/nav`) |
+| Input | a namespaced address (`app::home-page.phtml`, `layout::default`, `admin::dashboard.phtml`) |
 | Output | an absolute path, or `false` so the aggregate continues |
 | Build | the name→path map is built once, at construction |
 | Memoization | resolved names are remembered per instance; nothing above memoizes (`research.md`) |
