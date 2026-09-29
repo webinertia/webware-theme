@@ -38,6 +38,22 @@ Notes that apply to every task: `mago fmt` before any commit; all four gates cle
 - [ ] T009 Register the resolver in `src/Resolver/Container/ThemeResolverFactory.php` and wire it to
       the aggregate ahead of the map/path resolvers, so an active theme wins over package defaults
 
+## Phase 2b — Prototype the construction before committing to it
+
+Next free IDs, following the convention above. Both shapes hang off two measured facts: a map's key is the
+address the renderer asks for (`app::home-page`), and the resolver gets a factory, so the active theme can
+be injected from configuration.
+
+- [ ] T035 Prototype **namespace-keyed paths** (mezzio's `templates.paths`, the active theme's directory
+      prepended per namespace). Measure the lookup cost with a theme installed, and confirm the ordering
+      hazard: integer-keyed lists append in provider order, so the first-registered path wins a
+      same-named file, which is the opposite of what a theme needs
+- [ ] T036 Prototype **theme-keyed maps** (`[theme][address] => path` for every theme at once, active
+      theme injected into the resolver, `default` as the per-address fallback). Confirm the active theme
+      becomes a lookup-time fact, and measure what building the maps costs (directory scan or manifest)
+- [ ] T037 Write down which won and why, then fold it into the resolver tasks above rather than leaving
+      two constructions in the code
+
 ## Phase 3 — Configuration
 
 - [ ] T010 Define the configuration shape (active theme + roots + per-component roots) as a docblock

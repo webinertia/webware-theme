@@ -56,8 +56,17 @@ Two things are decisions rather than open code:
 
 - **Module order** for a namespace served by more than one module — presumably the application's own
   module first.
-- **Paths or a map** for the per-namespace lists: mezzio's `templates.paths` walked per lookup, or
-  flattened into a map (`research.md` has the measurements).
+- **Namespace-keyed paths or theme-keyed maps** — the two constructions worth prototyping, since each
+  decides whether the active theme is a build-time or a lookup-time fact:
+  - *namespace-keyed paths*: mezzio's own `templates.paths` shape, with the active theme's directory
+    prepended per namespace (walked per lookup).
+  - *theme-keyed maps*: `[theme][address] => path` for every theme at once, with the active theme
+    injected into the resolver, which falls back to `default` per address (`research.md` has the lookup
+    measurements).
+
+  The key of a map is already the address the renderer asks for, which is why the map is the override
+  point today; the key of a path list is the namespace, and its integer-keyed lists append in provider
+  order, so the first-registered path wins a same-named file.
 
 ## Theme root
 
