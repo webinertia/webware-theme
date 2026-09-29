@@ -66,17 +66,20 @@ Notes that apply to every task: `mago fmt` before any commit; all four gates cle
 - [ ] T018 Confirm the convention against an existing package (webware-navigation's templates) and
       record any divergence rather than moving files in a package outside this feature's scope
 
-## Phase 6 — webware-htmx body/layout (FR-012, FR-013)
+## Phase 6 — Consumer-side work, deliberately not in this list
 
-- [ ] T019 Express the body and layout as ordinary theme template names, and reduce
-      `LaminasRendererFactory`'s five-key lookup (`templates.layout`, `templates.body`,
-      `templates.default_layout`, `templates.default_body`, `view_manager.default_layout`) to the
-      theme-resolved names
-- [ ] T020 Move the IMS shell out of `webware-htmx/templates/body/default.phtml` into an `ims` theme,
-      and ship a helper-clean `default` body in its place (the current default calls
-      `$this->imsMessenger()`, a helper defined nowhere)
-- [ ] T021 Make the `ims` theme extraction render byte-identical markup to what the application
-      renders today (SC-005)
+The work the convention *enables* elsewhere is not this feature's to do:
+
+- Collapsing webware-htmx's five body/layout keys (`templates.layout`, `templates.body`,
+  `templates.default_layout`, `templates.default_body`, `view_manager.default_layout`) to one name each
+- Extracting the IMS shell out of `webware-htmx/templates/body/default.phtml` into an `ims` theme, and
+  shipping a helper-clean `default` body in its place
+- Correcting webware-htmx's override documentation (its README states the opposite of how the config
+  aggregator merges)
+
+All three are tracked in **webinertia/webware-htmx#21**. This feature's obligation ends at the convention:
+theme-less names, a `default` theme per package, and per-template fallback. Task numbering continues in
+Phase 7 rather than renumbering what follows.
 
 ## Phase 7 — Tests
 
