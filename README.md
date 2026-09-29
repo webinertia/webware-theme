@@ -1,24 +1,15 @@
-# webware/skeleton
+# webware/webware-theme
 
-Greenfield starter for Webware packages: the shared tooling config, the organization's
-required CI workflow contract, and a containerized dev environment — so a new component
-starts aligned instead of being retrofitted.
+Theme support for Webware applications: a theme is a directory under a component's
+`templates/`, resolved by name through laminas-view, with per-template fallback to the
+`default` theme that every component ships.
 
-> **The badges are fenced deliberately.** Un-fence the block below, replace every
-> placeholder with the derived repository's own coordinates, and delete this note.
-> Nothing should advertise a workflow, a package or a report that does not exist yet.
-
-```markdown
-[![PHP Version](https://img.shields.io/packagist/php-v/OWNER/PACKAGE)](https://packagist.org/packages/OWNER/PACKAGE)
-[![Latest Version](https://img.shields.io/packagist/v/OWNER/PACKAGE)](https://packagist.org/packages/OWNER/PACKAGE)
-[![License](https://img.shields.io/github/license/ORG/REPO)](LICENSE)
-[![Required CI](https://github.com/ORG/REPO/actions/workflows/required/webinertia/.github/.github/workflows/org-required-ci.yml/badge.svg)](https://github.com/ORG/REPO/actions/workflows/required/webinertia/.github/.github/workflows/org-required-ci.yml)
-[![codecov](https://codecov.io/gh/ORG/REPO/graph/badge.svg)](https://codecov.io/gh/ORG/REPO)
-[![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2FORG%2FREPO%2FDEFAULT_BRANCH)](https://dashboard.stryker-mutator.io/reports/github.com/ORG/REPO/DEFAULT_BRANCH)
-```
-
-Placeholders: `OWNER/PACKAGE` is the Packagist name, `ORG/REPO` the GitHub
-coordinates, `DEFAULT_BRANCH` the default branch.
+[![PHP Version](https://img.shields.io/packagist/php-v/webware/webware-theme)](https://packagist.org/packages/webware/webware-theme)
+[![Latest Version](https://img.shields.io/packagist/v/webware/webware-theme)](https://packagist.org/packages/webware/webware-theme)
+[![License](https://img.shields.io/github/license/webinertia/webware-theme)](LICENSE)
+[![Required CI](https://github.com/webinertia/webware-theme/actions/workflows/required/webinertia/.github/.github/workflows/org-required-ci.yml/badge.svg)](https://github.com/webinertia/webware-theme/actions/workflows/required/webinertia/.github/.github/workflows/org-required-ci.yml)
+[![codecov](https://codecov.io/gh/webinertia/webware-theme/graph/badge.svg)](https://codecov.io/gh/webinertia/webware-theme)
+[![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fwebinertia%2Fwebware-theme%2F1.0.x)](https://dashboard.stryker-mutator.io/reports/github.com/webinertia/webware-theme/1.0.x)
 
 ## What ships here
 
@@ -39,33 +30,6 @@ config:
 byte-identical to the canonical artifacts in
 `webware-tools/presets/webware-alignment/artifacts/` — copy updates from there rather than
 editing them here.
-
-## Using this template
-
-Work the list top to bottom; the namespace rename is the one that bites, because
-`extra.laminas.config-provider` is a plain string that no tool validates for you.
-
-- [ ] `composer.json` — `name`, `description`, `keywords`
-- [ ] `composer.json` — `extra.laminas.config-provider` → the new FQCN
-- [ ] `composer.json` — both PSR-4 roots: `Webware\Skeleton\` → `src/` and the two `WebwareTest*` roots
-- [ ] `src/`, `test/unit/`, `test/integration/` — namespaces and `use` statements
-- [ ] Every new file's header block — "This file is part of the Webware Skeleton package"
-- [ ] `.github/copilot-instructions.md` — the title line
-- [ ] `README.md` — this title, the description, and the fenced badge block (un-fence it, replace the placeholders)
-- [ ] `LICENSE` — copyright holder and year
-- [ ] `webware-ci.json` — `min_msi` / `min_covered_msi` (see below), and uncomment the `db_*` keys for a package whose tests need a database
-- [ ] Default branch — a new repo starts on an `N.N.x` branch (this one is `1.0.x`)
-
-The full badge block sits at the top of this file, fenced. Un-fence it and replace the
-`OWNER/PACKAGE`, `ORG/REPO` and `DEFAULT_BRANCH` placeholders there rather than adding a
-second copy here.
-
-The Stryker badge embeds the branch segment — update it in both the badge URL and the
-dashboard link whenever the default branch changes.
-
-**Do not point the CI badge at `continuous-integration.yml`.** A consumer repository has no
-such file, so that URL 404s. The required-route URL above is the one GitHub's own "Create
-status badge" dialog produces, because the workflow file lives in the config repository.
 
 ## Quality gates
 
