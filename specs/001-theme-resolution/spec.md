@@ -190,6 +190,11 @@ agreements, the four Mago gates, and the MSI floors in `webware-ci.json`.
 
 ## Assumptions
 
+- The package identity is settled: `webware/webware-theme`, namespace `Webware\Theme`. The name used in
+  the earlier axleus iteration (`ThemeManager`) is not carried over; the package is named for the
+  concern rather than for a service inside it.
+- The runtime dependency is `laminas/laminas-view` alone. `mezzio/mezzio-laminasviewrenderer` and
+  `webware/webware-htmx` stay consumers, not dependencies.
 - The root chain order is application theme → component theme → component default. The exact order is
   a planning decision to confirm, since it decides which of two same-named templates wins.
 - The default theme's directory name is `default`, which cannot collide with mezzio's internal

@@ -11,6 +11,49 @@ Theme support for Webware applications: a theme is a directory under a component
 [![codecov](https://codecov.io/gh/webinertia/webware-theme/graph/badge.svg)](https://codecov.io/gh/webinertia/webware-theme)
 [![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fwebinertia%2Fwebware-theme%2F1.0.x)](https://dashboard.stryker-mutator.io/reports/github.com/webinertia/webware-theme/1.0.x)
 
+## The convention
+
+A theme is a directory named for the theme, inside a package's `templates/` directory:
+
+```
+templates/            # a package's markup
+├── default/          # every package that ships templates ships this one
+└── ims/              # an alternate theme, same layout of files
+```
+
+Template names are theme-less — `body`, `layout/default`, `partials/nav` — and the theme selects the
+root, so a component's references to its own templates survive a theme change. Resolution consults the
+roots in order and falls back **per template**, so a theme that overrides one layout leaves every other
+template coming from `default`.
+
+That is the whole mechanism: a redesign is a directory of files and the assets it needs, not a fork of
+every package. Nothing is compiled, published or watched.
+
+## Installation
+
+```bash
+composer require webware/webware-theme
+```
+
+Register the `ConfigProvider` in your Mezzio application config aggregator:
+
+```php
+Webware\Theme\ConfigProvider::class,
+```
+
+## Design
+
+The design and its measurements live with the component, in `specs/001-theme-resolution/`:
+
+| Document | Contents |
+|---|---|
+| `spec.md` | Requirements, user stories, success criteria |
+| `plan.md` | Approach, and the measurements it answers to |
+| `research.md` | What was measured, and why the earlier renderer-modifying approach was dropped |
+| `data-model.md` | Entities, the resolution chain, the configuration shape |
+| `tasks.md` | The task list |
+| `quickstart.md` | Using a theme, from either side |
+
 ## What ships here
 
 Everything in this repository is either a **package of record** consumed from

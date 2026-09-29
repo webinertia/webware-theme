@@ -58,7 +58,9 @@ specs/001-theme-resolution/
 ├── spec.md          # this feature's requirements
 ├── plan.md          # this file
 ├── tasks.md         # dependency-ordered task list
-└── research.md      # resolution-cost findings and the decisions they forced
+├── research.md      # what was measured, and why the renderer-modifying approach was dropped
+├── data-model.md    # entities, the resolution chain, and the configuration shape
+└── quickstart.md    # using a theme from both sides: theme author and package author
 ```
 
 Note: `.specify/` and `/specs/` are ignored by this repository's `.gitignore` (inherited from
