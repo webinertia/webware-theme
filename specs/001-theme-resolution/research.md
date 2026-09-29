@@ -7,6 +7,18 @@ re-derived rather than taken on faith. Measurements were taken against the insta
 `laminas/laminas-view` 3.x and `mezzio/mezzio-laminasviewrenderer` in `webinertia/webware` on
 2026-09-29.
 
+## Namespaced resolution is the base
+
+mezzio addresses templates as `<namespace>::<name>`, and `NamespacedPathStackResolver` already owns one
+`TemplatePathStack` per namespace. This feature builds on that rather than replacing it: the theme becomes
+the **first directory segment** under a module's `templates/`, and the work is assembling, per namespace,
+the paths that namespace is served from — the active theme's directory before `default` — so that "the
+theme does not ship this template" resolves from `default` with no special case anywhere.
+
+Earlier iterations instead pushed extra paths onto the resolver stack globally and modified the renderer to
+do it. Same idea in the wrong place: it paid the cost for every template in the application whether or not
+the theme had anything to say about that template.
+
 ## Why not the renderer
 
 The earlier iterations of this component modified the renderer and pushed additional paths onto its
@@ -96,8 +108,8 @@ with Tailwind bridges later via asset helpers. Consequences that shaped the desi
 
 ## Open items
 
-- Root-chain order (application theme → component theme → component default) is assumed, not yet
-  exercised against a real second component.
+- Cross-module order for a shared namespace is assumed (the application's own module first), not yet
+  exercised against a real second module.
 - Whether a theme root that must be enumerated on disk is scanned at map-build time or declared in a
   manifest is a planning decision (T008 in `tasks.md`).
 - The `ims` theme extraction has not been attempted in the application, so SC-005 (byte-identical

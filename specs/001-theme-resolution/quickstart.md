@@ -4,23 +4,31 @@
 
 ## For a designer or developer refreshing a client's site
 
-A theme is a directory of templates plus the assets that go with it. Nothing is compiled, published or
+A theme is a directory under a module's `templates/`, holding one subdirectory per template namespace,
+plus the assets the installer puts under `public/theme/<theme>/`. Nothing is compiled, published or
 registered.
 
 ```
-templates/acme/                 # the theme; `acme` is the name
-├── layout/default.phtml        # overrides the package's layout
-└── partials/nav.phtml          # overrides one partial
+src/App/templates/
+├── default/                          # App's own theme, shipped with it
+│   ├── app/home-page.phtml                 -> app::home-page.phtml
+│   └── layout/default.phtml                -> layout::default
+└── acme/                             # the theme; only what the redesign changes
+    ├── app/home-page.phtml                 -> app::home-page.phtml
+    └── layout/default.phtml                -> layout::default
 
-public/theme/acme/              # this theme's assets, where they can be served
+public/theme/acme/                    # this theme's assets, where they can be served
 └── css/acme.css
 ```
 
-Templates and assets live in different places because they are served differently: `templates/` is
-never a served location, so nothing under it can be requested by a browser.
+Addresses stay mezzio's namespaced ones (`<namespace>::<name>`); the theme selects the first directory
+segment and is never part of the address. Templates and assets live in different places because they are
+served differently — `templates/` is never a served location, so nothing under it can be requested by a
+browser.
 
-1. Create the theme directory under `templates/` and copy into it only what the redesign changes.
-   Anything you do not copy continues to come from the component's `default` theme.
+1. Create the theme directory beside the module's `default` and copy into it only what the redesign
+   changes, keeping each template under its namespace. Anything you do not copy continues to come from
+   `default`.
 2. Its assets are the installer's job, not yours: run the theme installer and they appear under
    `public/theme/<theme>/` (exact path shape and filenames still to be settled), with their **names**
    pointed at them in the resource map — the names are the ones the components already use; you are
@@ -44,27 +52,28 @@ return [
 
 ## For a package author
 
-Put markup under `templates/default/` and publish the root from your `ConfigProvider`. You never
-mention themes in your own code:
+Put markup under `templates/default/<namespace>/` and publish the root from your `ConfigProvider`. You
+never mention themes in your own code:
 
 ```
 your-package/
-├── src/ConfigProvider.php       # publishes templates/default as this package's root
+├── src/ConfigProvider.php                  # publishes templates/ as this package's root
 └── templates/default/
-    ├── layout/default.phtml
-    └── body.phtml
+    ├── your-namespace/admin-settings.phtml      -> your-namespace::admin-settings.phtml
+    └── layout/default.phtml                     -> layout::default
 ```
 
-An application that installs your package gets a working interface with no theme configuration. If you
-also want to ship an alternate theme, add `templates/<name>/` beside `default` — same convention, no
-registration.
+Address templates the way mezzio does — `<namespace>::<name>`, where the namespace is one you choose
+(`your-namespace`, or a shared one such as `layout`). An application that installs the package gets a
+working interface with no theme configuration; if you want to ship an alternate theme, add
+`templates/<name>/<namespace>/` beside `default` — same convention, no registration.
 
 Rules that keep this working across packages:
 
-- Template names are **theme-less**. Name a template for what it is (`body`, `partials/nav`), never for
-  a theme, so that component-to-component references survive a theme change.
-- A template that you ship for others to override must be published under a name they can predict;
-  otherwise they cannot override it.
+- Addresses are **namespaced and theme-less**. Name a template for what it is (`body`, `layout/default`),
+  never for a theme, so component-to-component references survive a theme change.
+- A template you ship for others to override must live under a namespace they can predict; otherwise they
+  cannot override it.
 - The `default` theme may only call helpers that your package's own dependencies register. A package
   cannot call an application helper (this is the defect that moving the IMS shell into the `ims` theme
   fixes).

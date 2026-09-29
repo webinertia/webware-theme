@@ -13,18 +13,26 @@ Theme support for Webware applications: a theme is a directory under a component
 
 ## The convention
 
-A theme is a directory named for the theme, inside a package's `templates/` directory:
+A theme is a directory named for the theme, directly inside a module's `templates/` directory, holding one
+subdirectory per template namespace:
 
 ```
-templates/            # a package's markup
-├── default/          # every package that ships templates ships this one
-└── ims/              # an alternate theme, same layout of files
+src/App/templates/
+├── default/                  # every module that ships templates ships this one
+│   ├── app/home-page.phtml          -> app::home-page.phtml
+│   ├── layout/default.phtml         -> layout::default
+│   └── admin/dashboard.phtml        -> admin::dashboard.phtml   (a vendor template, overridden here)
+└── acme/                     # a theme, same layout of files
+    └── layout/default.phtml         -> layout::default
 ```
 
-Template names are theme-less — `body`, `layout/default`, `partials/nav` — and the theme selects the
-root, so a component's references to its own templates survive a theme change. Resolution consults the
-roots in order and falls back **per template**, so a theme that overrides one layout leaves every other
-template coming from `default`.
+Addresses stay mezzio's namespaced ones — `<namespace>::<name>` — and the theme selects the first
+directory segment, so it is never part of the address and a component's references to its own templates
+survive a theme change. Resolution consults the paths a namespace is served from, the active theme's
+directory before `default`, and falls back **per template**, so a theme that overrides one layout leaves
+every other template coming from `default`. A module overrides another module's template by placing that
+namespace under its own theme directory — which is how an application restyles a vendor template without
+touching the package that ships it.
 
 That is the whole mechanism: a redesign is a directory of templates plus the assets that go with it, not
 a fork of every package. Templates resolve from `templates/`; assets are served from `public/theme/<theme>/`
@@ -51,7 +59,7 @@ The design and its measurements live with the component, in `specs/001-theme-res
 | `spec.md` | Requirements, user stories, success criteria |
 | `plan.md` | Approach, and the measurements it answers to |
 | `research.md` | What was measured, and why the earlier renderer-modifying approach was dropped |
-| `data-model.md` | Entities, the resolution chain, the configuration shape |
+| `data-model.md` | Entities, the layout on disk, resolution, the configuration shape |
 | `tasks.md` | The task list |
 | `quickstart.md` | Using a theme, from either side |
 

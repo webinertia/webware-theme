@@ -137,26 +137,34 @@ agreements, the four Mago gates, and the MSI floors in `webware-ci.json`.
 
 ### Functional Requirements
 
-- **FR-001**: A theme MUST be a directory named for the theme, inside the `templates/` directory of the
-  package that ships it.
-- **FR-002**: Template names MUST be theme-less. The name used in code identifies the template within
-  a theme; the theme selects the root.
-- **FR-003**: Resolution MUST consult an ordered chain of theme roots and return the first match.
+- **FR-001**: A theme MUST be a directory named for the theme, directly inside the `templates/` directory
+  of a module that ships or overrides templates. A module's theme directory holds one subdirectory per
+  template namespace.
+- **FR-002**: Templates MUST keep mezzio's namespaced addressing — `<namespace>::<name>`, e.g.
+  `app::home-page.phtml`, `layout::default`, `admin::dashboard.phtml`. The theme is never part of the
+  address; it selects the first directory segment under `templates/`.
+- **FR-003**: Resolution for a namespace MUST consult the paths that namespace is served from, module by
+  module, and within each module the active theme's directory before `default`.
 - **FR-004**: Fallback MUST be per template, not per theme: a template the active theme does not ship
-  resolves from the `default` theme of the component that owns it.
+  resolves from `default` in the same namespace, and a template no module ships falls through to the
+  framework's own resolvers.
+- **FR-004a**: Any module MUST be able to override another module's template by placing that namespace
+  under its own theme directory — this is how an application overrides a vendor template without
+  touching the package that ships it.
 - **FR-005**: Resolution MUST NOT add a filesystem walk per lookup. Map lookups are the expected
   mechanism; any scan performed to build a map MUST happen once.
 - **FR-006**: Theme configuration MUST come from configuration only. No database access, at boot or at
   render time.
-- **FR-007**: Every package that ships layouts or templates MUST ship a `default` theme.
-- **FR-008**: The active theme MUST be selectable by a configuration value alone.
+- **FR-007**: Every module that ships layouts or templates MUST ship a `default` theme.
+- **FR-008**: The active theme MUST be selectable by a configuration value alone. A module that ships no
+  directory for the active theme contributes only its `default`.
 - **FR-009**: Assets MUST be resolved through laminas-view's asset helpers, with theme values
   overriding entries in the resource map. No request-time asset middleware. Asset files MUST live under
   `public/` (`/public/theme/<theme>/…`) and never inside a theme's `templates/` root, which is not a
   served location.
 - **FR-010**: A theme MUST work without a build step. Markup and assets are the deliverables.
-- **FR-011**: Roots for application and client modules MUST be derivable from the PSR-4 namespaces
-  registered for that module, with package roots declared by their own `ConfigProvider`.
+- **FR-011**: Module roots MAY be derived from the PSR-4 namespaces registered for that module (its
+  namespace root's sibling `templates/`), with package roots declared by their own `ConfigProvider`.
 - **FR-012**: The body and the layout MUST each be named by **one** configuration value, and that value
   MUST be a theme-resolvable template name (`body`, `layout`) rather than a path the owning package
   publishes as a map entry. This is what lets a theme point at a body template at all, so the collapse of
@@ -177,10 +185,10 @@ agreements, the four Mago gates, and the MSI floors in `webware-ci.json`.
 
 - **Theme**: a name plus the root it resolves from. Configuration-driven; identity is the directory
   name.
-- **Theme root**: the directory a theme's templates resolve against, contributed by a package's
-  `ConfigProvider` or derived from a module's registered namespace.
-- **Resolver**: the component that turns a theme-less template name into a path, applying the root
-  chain and per-template fallback.
+- **Theme root**: the directory a theme resolves against in one module — `<module>/templates/<theme>/` —
+  contributed by a package's `ConfigProvider` or derived from a module's registered namespace.
+- **Resolver**: the component that turns a namespaced address (`<namespace>::<name>`) into a path, using
+  the paths that namespace is served from, with the active theme's directory before `default`.
 - **Asset name**: a fixed vocabulary entry in the resource map that a theme may re-value.
 
 ## Success Criteria *(mandatory)*
@@ -206,8 +214,9 @@ agreements, the four Mago gates, and the MSI floors in `webware-ci.json`.
   concern rather than for a service inside it.
 - The runtime dependency is `laminas/laminas-view` alone. `mezzio/mezzio-laminasviewrenderer` and
   `webware/webware-htmx` stay consumers, not dependencies.
-- The root chain order is application theme → component theme → component default. The exact order is
-  a planning decision to confirm, since it decides which of two same-named templates wins.
+- Which module's path is consulted first when more than one module serves the same namespace is a
+  decision to confirm (presumably the application's own module first), since it decides which of two
+  same-named templates wins.
 - The default theme's directory name is `default`, which cannot collide with mezzio's internal
   unnamespaced bucket (`__DEFAULT__`, a private constant, unreachable as a template namespace).
 - Configuration merging decides override precedence: integer-keyed lists append (first-registered

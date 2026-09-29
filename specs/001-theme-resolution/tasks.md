@@ -25,8 +25,9 @@ Notes that apply to every task: `mago fmt` before any commit; all four gates cle
 - [ ] T004 Implement `Resolver\ThemeResolver` in `src/Resolver/ThemeResolver.php`, implementing
       `Laminas\View\Resolver\ResolverInterface`. It MUST return `false` — never throw — for a name it
       cannot resolve, so `AggregateResolver` continues to the next resolver
-- [ ] T005 Apply the ordered root chain (application theme → component theme → component default) and
-      return the first match, so fallback is per template and not per theme (FR-004)
+- [ ] T005 Build, per namespace, the paths that namespace is served from — module by module, and within
+      each module the active theme's directory before `default` — so fallback is per template and not per
+      theme (FR-004)
 - [ ] T006 Resolve from a map built once, not by walking directories per lookup (FR-005): build the
       map when the resolver is constructed, and memoize resolved names in the instance
 - [ ] T007 Build the map without touching the filesystem where the configuration already names the
@@ -78,10 +79,14 @@ than displacing the ones below it.
 
 ## Phase 5 — The convention in the packages
 
-- [ ] T017 Define the `templates/<theme>/` layout convention for packages and write it into the
-      package README: a theme is a directory named for the theme, inside `templates/`
-- [ ] T018 Confirm the convention against an existing package (webware-navigation's templates) and
-      record any divergence rather than moving files in a package outside this feature's scope
+- [ ] T017 Define the layout convention and write it into the package README:
+      `<module>/templates/<theme>/<namespace>/<name>.phtml`, addressed as `<namespace>::<name>` — a theme
+      is a directory of namespace directories, and it is never part of the address
+- [ ] T018 Confirm the convention against a package with existing templates (webware-navigation,
+      webware-htmx) and record any divergence rather than moving files in a package outside this
+      feature's scope
+- [ ] T019 Settle the cross-module question the convention leaves open: when more than one module serves
+      the same namespace, which module's path is consulted first (record it in `plan.md`)
 
 ## Phase 6 — The htmx configuration prerequisite (FR-012)
 
@@ -110,7 +115,8 @@ Everything else in webinertia/webware-htmx#21 is work the convention *enables* b
 
 - [ ] T022 Unit: `test/unit/Resolver/ThemeResolverTest.php` — a theme hit, a per-template fallback to
       `default`, an unknown name returning `false`, and name validation rejecting separators
-- [ ] T023 Unit: the root-chain order, including the case where two roots ship the same template name
+- [ ] T023 Unit: the per-namespace ordering, including the case where two modules serve the same
+      namespace and ship the same template name
 - [ ] T024 Integration: real template files across two roots, proving fallback and that resolution
       does not scan per lookup
 - [ ] T025 Keep `test/integration/ConfigProviderWiringTest.php` green: it asserts

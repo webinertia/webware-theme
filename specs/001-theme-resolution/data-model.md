@@ -13,38 +13,65 @@ Identity is the directory name. There is no registry and no per-theme metadata f
 | Field | Type | Rules |
 |---|---|---|
 | `name` | `non-empty-string` | A single path segment: no directory separators, no `..`, not empty. It is used as a directory name under `templates/`, so anything else is a path-escape (T002) |
-| `root` | `non-empty-string` | Absolute path to the theme's directory: `<component>/templates/<name>`, or an application/client module's equivalent |
+| `root` | `non-empty-string` | Absolute path to the theme's directory in one module: `<module>/templates/<name>`. A theme usually has one root per module that ships or overrides templates |
 
-`default` is the reserved name: every package that ships templates ships `default`, and `default` is the
-last root consulted. It cannot collide with mezzio's internal unnamespaced bucket, which is the private
-constant `__DEFAULT__` and unreachable as a template namespace.
+`default` is the reserved name: every module that ships templates ships `default`, and it is the fallback
+consulted after the active theme. It cannot collide with mezzio's internal unnamespaced bucket, which is
+the private constant `__DEFAULT__` and unreachable as a template namespace.
+
+## The layout on disk
+
+Every module — a package, or a module the application ships itself (`App` is just one of them, shipped by
+`webware/webware`) — keeps its templates as `<module>/templates/<theme>/<namespace>/<name>.phtml`, and a
+template is addressed `<namespace>::<name>`. The theme is **not** part of the address.
+
+```
+src/App/templates/
+├── default/                          # App's default theme
+│   ├── app/home-page.phtml                 -> app::home-page.phtml
+│   ├── layout/default.phtml                -> layout::default
+│   ├── admin/dashboard.phtml               -> admin::dashboard.phtml    (vendor template, overridden here)
+│   └── usermanager/profile.phtml           -> user::profile.phtml       (vendor template, overridden here)
+└── acme/                             # the acme theme: only what it changes
+    ├── app/home-page.phtml
+    └── layout/default.phtml
+
+src/ims-store/templates/              # a module the application ships itself
+├── default/ims-store/admin-settings.phtml  -> ims-store::admin-settings.phtml
+└── acme/ims-store/admin-settings.phtml     # the acme override, inside that module
+```
+
+A vendor template comes from the vendor module's own `templates/default/<namespace>/` and is overridden by
+any module that places that namespace under its own theme directory — which is how the application
+overrides `admin::dashboard.phtml` without touching the package that ships it.
+
+## Resolution
+
+For a namespace, the resolver assembles the paths that namespace is served from — module by module, and
+within each module the active theme's directory before `default` — and addresses resolve against that.
+Per-template fallback falls out of the ordering: a template the active theme does not ship resolves from
+`default`, and the framework's own resolvers take anything not theme-owned at all.
+
+Two things are decisions rather than open code:
+
+- **Module order** for a namespace served by more than one module — presumably the application's own
+  module first.
+- **Paths or a map** for the per-namespace lists: mezzio's `templates.paths` walked per lookup, or
+  flattened into a map (`research.md` has the measurements).
 
 ## Theme root
 
-A directory a theme resolves against, plus where it came from. Roots are contributed in a declared
-order; the resolver walks that order per template name.
+A directory a theme resolves against in one module, plus where it came from.
 
 | Field | Type | Source |
 |---|---|---|
-| `component` | `non-empty-string` | The declaring package or module |
-| `path` | `non-empty-string` | Absolute directory |
+| `module` | `non-empty-string` | The module contributing it |
+| `path` | `non-empty-string` | `<module>/templates/<theme>/`, absolute |
 | `origin` | `package` \| `module` | `package` roots are declared by a `ConfigProvider`; `module` roots are derived from a registered PSR-4 namespace (its namespace root's sibling `templates/`) |
 
 Derivation rules for `module` roots (T014): take the namespace root directory, use its sibling
 `templates/`; skip `autoload-dev` prefixes; handle a prefix that maps to more than one directory by
 emitting a root per directory.
-
-## Resolution chain
-
-Applied per template name; the first match wins, and a miss falls through to the next resolver in the
-aggregate (which is what makes fallback per template rather than per theme).
-
-| Order | Root | Purpose |
-|---|---|---|
-| 1 | application theme (`templates/<active>` of the app or client module) | the redesign |
-| 2 | component theme (`<component>/templates/<active>`) | a theme that also ships component-specific overrides |
-| 3 | component default (`<component>/templates/default`) | what the package shipped |
-| 4 | the framework's own resolvers (`templates.map`, then `templates.paths`) | anything not theme-owned |
 
 ## Configuration shape
 

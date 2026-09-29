@@ -4,8 +4,9 @@
 
 ## Summary
 
-Ship `webware/webware-theme`: a theme contract, a resolver that applies an ordered root chain with
-per-template fallback, and the convention that a theme is a directory under a package's `templates/`.
+Ship `webware/webware-theme`: a theme contract, a resolver that assembles the per-namespace paths a
+template is served from (active theme before `default`) with per-template fallback, and the convention
+that a theme is a directory of namespace directories under a module's `templates/`.
 Packages contribute roots and asset names through their `ConfigProvider`; applications (and client
 modules) contribute theirs as configuration, with module roots derivable from registered PSR-4
 namespaces. No middleware, no build step, no database.
@@ -69,7 +70,7 @@ specs/001-theme-resolution/
 ├── plan.md          # this file
 ├── tasks.md         # dependency-ordered task list
 ├── research.md      # what was measured, and why the renderer-modifying approach was dropped
-├── data-model.md    # entities, the resolution chain, and the configuration shape
+├── data-model.md    # entities, the layout on disk, resolution, the configuration shape
 └── quickstart.md    # using a theme from both sides: theme author and package author
 ```
 
@@ -84,7 +85,7 @@ src/
 ├── ThemeInterface.php              # a theme: name + root + optional overrides
 ├── Theme.php                       # value object implementation (final readonly)
 ├── Resolver/
-│   ├── ThemeResolver.php           # ordered root chain + per-template fallback, memoized
+│   ├── ThemeResolver.php           # per-namespace paths, active theme before default, memoized
 │   └── Container/ThemeResolverFactory.php
 ├── Installer/
 │   ├── ThemeInstaller.php          # creates and manages a theme's assets under public/theme/<theme>/
@@ -112,6 +113,6 @@ installed asset set look like?".
 
 | Deviation | Why | What it costs |
 |---|---|---|
-| Theme roots contribute **map entries** rather than more `templates.paths` (the standard mezzio route) | FR-005: a path is a stat per lookup per path, and there is no resolver cache to absorb it in laminas-view 3 | Roots must be enumerable at map-build time (a directory scan or a manifest), and a theme that changes on disk needs the map rebuilt |
+| Per-namespace paths are assembled (theme directory before `default`) rather than the framework's own `templates.paths` being listed in provider order | FR-005: a path is a stat per lookup per path, and there is no resolver cache to absorb it in laminas-view 3, while the theme must come first regardless of provider order | The lists must be built at boot (a directory scan or a manifest), so a theme that changes on disk needs them rebuilt |
 | The resolver is a `ResolverInterface` instead of a renderer modification | The previous iteration modified the renderer and pushed paths onto its stack; keeping resolution out of the renderer keeps `webware-htmx` free to own body/layout layering | Resolution and rendering are configured in two places, and their interaction needs an integration test |
 | Theme identity is the directory name, not a registry entry | It is the convention that makes a redesign a directory of files, and it keeps the whole thing configuration-only (FR-006) | Two packages cannot ship different themes under the same name, and there is no per-theme metadata beyond the directory |
