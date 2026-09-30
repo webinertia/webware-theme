@@ -1,4 +1,4 @@
-# webware/skeleton — Copilot Agent Instructions
+# webware/webware-theme — Copilot Agent Instructions
 
 ## Read this before acting — fleet working agreements
 

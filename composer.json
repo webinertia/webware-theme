@@ -1,11 +1,12 @@
 {
-    "name": "webware/skeleton",
-    "description": "Greenfield starter for Webware packages: shared tooling config, the organization's required CI workflow contract, and a containerized dev environment.",
+    "name": "webware/webware-theme",
+    "description": "Provides theme support via laminas-view to webware applications.",
     "license": "BSD-3-Clause",
     "keywords": [
         "webware",
         "mezzio",
-        "skeleton"
+        "theme",
+        "laminas-view"
     ],
     "authors": [
         {
@@ -16,11 +17,12 @@
     ],
     "extra": {
         "laminas": {
-            "config-provider": "Webware\\Skeleton\\ConfigProvider"
+            "config-provider": "Webware\\Theme\\ConfigProvider"
         }
     },
     "require": {
         "php": "~8.4.1 || ~8.5.0",
+        "laminas/laminas-view": "^3.0",
         "psr/container": "^2.0"
     },
     "require-dev": {
@@ -33,13 +35,13 @@
     },
     "autoload": {
         "psr-4": {
-            "Webware\\Skeleton\\": "src/"
+            "Webware\\Theme\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "WebwareTest\\Skeleton\\": "test/unit/",
-            "WebwareTestIntegration\\Skeleton\\": "test/integration/"
+            "WebwareTest\\Theme\\": "test/unit/",
+            "WebwareTestIntegration\\Theme\\": "test/integration/"
         }
     },
     "minimum-stability": "dev",
