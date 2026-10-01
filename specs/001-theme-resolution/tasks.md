@@ -162,30 +162,30 @@ Everything else in webinertia/webware-htmx#21 is work the convention *enables* b
 Why: laminas-view's `Asset` helper is `final readonly` and is built once from
 `view_helper_config.asset.resource_map`, with no idea of a theme. The fix is a factory, not a subclass.
 
-- [ ] T042 Define the asset configuration shape as an `@type ThemeAssetsConfig` in `ConfigProvider`:
+- [X] T042 **Done:** the shape is `assets?` in the existing `@type ThemeConfig`, not a separate alias. Define the asset configuration shape as an `@type ThemeAssetsConfig` in `ConfigProvider`:
       `theme.assets.<theme>.<name> => value`, where `value` is a path relative to that theme's directory
       (`css/theme.css`) or an absolute URL (`https://`, `//`). Names are a fixed vocabulary defined by the
       components; a theme re-values them
-- [ ] T043 Implement `Webware\Theme\View\Helper\Container\AssetFactory` (`final`, returns a stock
+- [X] T043 **Done.** Also adds `Webware\Theme\ConfigPath` (nested-array reader) and `Exception\InvalidThemeNameException`; entries already under `view_helper_config.asset.resource_map` are kept as the base; only the `default` and the active theme names are validated (`^[A-Za-z0-9][A-Za-z0-9_-]*$`). Implement `Webware\Theme\View\Helper\Container\AssetFactory` (`final`, returns a stock
       `Laminas\View\Helper\Asset`). Merge `default` first, then the active theme over it. A relative value
       becomes `/theme/<theme>/<value>` using the theme that **defined** the name, so fallback is per name;
       absolute URLs pass through unchanged. Validate every theme name as a single path segment (no `/`,
       `\`, `..`, empty) and throw a package exception otherwise. Never throw for an unknown name here: the
       stock `Asset` does that at call time, which is wanted
-- [ ] T044 Register it for `Laminas\View\Helper\Asset::class` in the **view helper** factories, not the
+- [X] T044 **Done:** `view_helpers.factories` (verified against `laminas-view`'s `ConfigProvider`, which has `view_helpers` as the top-level plugin-manager key). Register it for `Laminas\View\Helper\Asset::class` in the **view helper** factories, not the
       container's `dependencies`. Verify the exact config key in `laminas-view/src/ConfigProvider.php`
       before writing it (`view_helper_config` holds helper options; the plugin-manager key is a different
       one). Merge order matters: this provider must come after `Mezzio\LaminasView\ConfigProvider`
       (D-004, `project-tracking#6`)
-- [ ] T045 Unit tests for the factory: active theme wins; per-name fallback to `default`; absolute URL
+- [X] T045 **Done:** `test/unit/View/Helper/Container/AssetFactoryTest.php`. Unit tests for the factory: active theme wins; per-name fallback to `default`; absolute URL
       unchanged; unknown name throws from the helper; a traversal theme name is rejected; an empty config
       yields a helper whose every call throws
-- [ ] T046 Integration test through a real `HelperPluginManager` (or the `ServiceManager` the other
+- [X] T046 **Done:** `test/integration/AssetHelperTest.php`. Integration test through a real `HelperPluginManager` (or the `ServiceManager` the other
       integration tests use) that `asset('theme.css')` returns `/theme/default/css/theme.css`, then the
       active theme's value after switching `theme.active`
 - [ ] T047 Document in `quickstart.md` how a theme author adds an asset and where the file goes
       (`public/theme/<theme>/…`, published by the installer, never hand-written)
-- [ ] T048 Record the final key paths in `data-model.md` and `research.md` (they currently describe
+- [X] T048 **Done earlier** (`data-model.md`, `research.md` carry `view_helper_config.asset.resource_map`). Record the final key paths in `data-model.md` and `research.md` (they currently describe
       `view_manager.asset.resource_map`, which is wrong, D-009)
 
 ## Phase 11 — The default theme's assets (repository `webinertia/default-theme`; D-015, D-016)
@@ -243,10 +243,10 @@ none lives in a component (standing rule 6).
 
 ## Phase 14 — Owner decisions of 2026-10-01 (D-005, D-011, D-012)
 
-- [ ] T062 Add constants for the known config keys in `ConfigProvider` (`THEME = 'theme'`, `ACTIVE`,
+- [X] T062 **Done:** `ConfigProvider::THEME`, `ACTIVE`, `THEMES`, `ASSETS`, used by both factories. Add constants for the known config keys in `ConfigProvider` (`THEME = 'theme'`, `ACTIVE`,
       `THEMES`, `ASSETS`) and use them in `ThemeResolverFactory` and the tests instead of the string
       literals (D-005). No new classes
-- [ ] T063 Validate a theme name as a single path segment (no separators, no `..`) at the one place it
+- [X] T063 **Done** in `AssetFactory` (the one place a name becomes a path today); the command (T066) must reuse the same rule. Validate a theme name as a single path segment (no separators, no `..`) at the one place it
       becomes a path, the asset factory (T043); test it. Do not add a value object (D-005)
 - [ ] T064 Component assets are per theme (D-011): in T042–T043 the asset values for a component live
       under `theme.assets.<theme>` and resolve to `/theme/<theme>/component/<component>/…`; document the

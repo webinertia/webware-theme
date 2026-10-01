@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace WebwareTest\Theme;
 
+use Laminas\View\Helper\Asset;
 use Laminas\View\Resolver\AggregateResolver;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversMethod;
@@ -23,6 +24,7 @@ use Webware\Theme\ConfigProvider;
 use Webware\Theme\Resolver\Container\AggregateResolverFactory;
 use Webware\Theme\Resolver\Container\ThemeResolverFactory;
 use Webware\Theme\Resolver\ThemeResolver;
+use Webware\Theme\View\Helper\Container\AssetFactory;
 
 #[CoversClass(ConfigProvider::class)]
 #[CoversMethod(ConfigProvider::class, '__invoke')]
@@ -50,6 +52,11 @@ final class ConfigProviderTest extends TestCase
                 'factories' => [
                     ThemeResolver::class     => ThemeResolverFactory::class,
                     AggregateResolver::class => AggregateResolverFactory::class,
+                ],
+            ],
+            'view_helpers' => [
+                'factories' => [
+                    Asset::class => AssetFactory::class,
                 ],
             ],
         ];

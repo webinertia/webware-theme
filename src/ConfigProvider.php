@@ -14,10 +14,12 @@ declare(strict_types=1);
 
 namespace Webware\Theme;
 
+use Laminas\View\Helper\Asset;
 use Laminas\View\Resolver\AggregateResolver;
 use Webware\Theme\Resolver\Container\AggregateResolverFactory;
 use Webware\Theme\Resolver\Container\ThemeResolverFactory;
 use Webware\Theme\Resolver\ThemeResolver;
+use Webware\Theme\View\Helper\Container\AssetFactory;
 
 /**
  * Wiring entry point for the package.
@@ -32,17 +34,31 @@ use Webware\Theme\Resolver\ThemeResolver;
  * @type ThemeConfig array{
  *     active?: non-empty-string,
  *     themes?: array<non-empty-string, array<non-empty-string, non-empty-string>>,
+ *     assets?: array<non-empty-string, array<non-empty-string, non-empty-string>>,
  * }
  * @type DependenciesConfig array{
  *     factories: array<class-string, class-string>,
  * }
  * @type ProviderConfig array{
  *     dependencies: DependenciesConfig,
+ *     view_helpers: array{factories: array<class-string, class-string>},
  * }
  * @internal
  */
 final class ConfigProvider
 {
+    /** The top-level configuration key every theme setting sits under. */
+    final public const string THEME = 'theme';
+
+    /** The name of the active theme, under {@see self::THEME}. */
+    final public const string ACTIVE = 'active';
+
+    /** Template overrides per theme, under {@see self::THEME}. */
+    final public const string THEMES = 'themes';
+
+    /** Asset values per theme, under {@see self::THEME}. */
+    final public const string ASSETS = 'assets';
+
     /** @return DependenciesConfig */
     public function getDependencies(): array
     {
@@ -59,6 +75,11 @@ final class ConfigProvider
     {
         return [
             'dependencies' => $this->getDependencies(),
+            'view_helpers' => [
+                'factories' => [
+                    Asset::class => AssetFactory::class,
+                ],
+            ],
         ];
     }
 }

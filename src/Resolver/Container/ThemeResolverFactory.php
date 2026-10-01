@@ -47,19 +47,19 @@ final class ThemeResolverFactory
         $config = is_array($raw) ? $raw : [];
 
         /** @var mixed $theme */
-        $theme = $config['theme'] ?? [];
+        $theme = $config[ConfigProvider::THEME] ?? [];
 
         /** @var ThemeConfig $theme */
         $theme = is_array($theme) ? $theme : [];
 
         /** @var mixed $maps */
-        $maps = $theme['themes'] ?? [];
+        $maps = $theme[ConfigProvider::THEMES] ?? [];
 
         /** @var array<non-empty-string, array<non-empty-string, non-empty-string>> $maps */
         $maps = is_array($maps) ? $maps : [];
 
         /** @var mixed $active */
-        $active = $theme['active'] ?? null;
+        $active = $theme[ConfigProvider::ACTIVE] ?? null;
 
         return new ThemeResolver(
             $maps,
