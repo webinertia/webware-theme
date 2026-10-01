@@ -75,6 +75,7 @@ contradicted; confirm if you disagree), **Proposed** (needs the owner), **Open**
 | D-017 | 2026-10-01 | `ThemeResolver` trusts a map entry and does not stat the file (T008). A missing file surfaces as the renderer's own error. | Settled | The resolver does no filesystem call by design (FR-005). |
 | D-018 | 2026-10-01 | The home page (`app::home-page`) is to be a CMS-style landing page loading content blocks from installed components through a PSR-14 collect event, mirroring `webware-admin` (`DashboardMiddleware` dispatches `RegisterWidgetEvent`, listeners add `WidgetInterface`, `AclWidgetFilterIterator` filters by role). The contract is **not** admin's `WidgetInterface`: it needs a `region`. Where the contract lives is **a new component** (owner, 2026-10-01: "Will be provided by a new component. Im still deciding on a few things there before that work will start."). | Settled (location); details open, work not started | Do not start it until the owner says so. Also unchecked: how `AclWidgetFilterIterator` resolves an anonymous user (`DashboardMiddleware` passes it `null`). |
 | D-019 | 2026-10-01 | Home-page work is **out of this feature's scope** except for the `default` theme templates that render it. | Accepted | Keeps `webware-theme` about resolution and assets. |
+| D-020 | 2026-10-01 | **Creating a theme (the command, D-012) copies the `default` theme's primary files under the given name**: in 1.0 only the layout, body and home-page templates and the main CSS file. It then **registers configuration**: a template map (`theme.themes.<name>`) covering **only the copied templates**, and **sets the new theme as active** (`theme.active`). | Settled (behaviour); where the config is written is open | Owner, 2026-10-01: "A copy of the default files will be created and named as the provided name. I think in 1.0 we will just copy the primary templates. Layout, body, home-page and main css file. Configuration will also need to be registered and a template map covering just the copied templates etc and it will set the newly created theme as active." Everything not copied falls back to `default` per address (D-002), so the copy stays small. Tasks T065, T066. |
 
 ## 4. Next actions, in order
 
@@ -85,8 +86,10 @@ contradicted; confirm if you disagree), **Proposed** (needs the owner), **Open**
    ACL templates: finish the rename (D-013) and extract the ACL JavaScript into webware-acl (D-010).
 4. The owner's four answers are recorded (D-005, D-011, D-012, D-018). D-018 is **a new component, not yet
    named or specified; the owner is still deciding details, so do not start it**. The theme-selection
-   command and widget (D-012) need a persisted active theme, which does not exist: `theme.active` is
-   read-only configuration today. Raise that with the owner before building T065–T068.
+   command and widget (D-012) need a persisted active theme: `theme.active` is read-only configuration
+   today, and D-020 has the command write configuration. **Open: which file the command writes** (for
+   example an autoload file such as `config/autoload/theme.local.php`) and how the admin widget switches
+   the theme the same way. Ask the owner before building T065–T068.
 
 ## 5. Gotchas that cost time already
 

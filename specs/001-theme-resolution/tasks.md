@@ -252,11 +252,13 @@ none lives in a component (standing rule 6).
       under `theme.assets.<theme>` and resolve to `/theme/<theme>/component/<component>/…`; document the
       layout in `data-model.md` (it currently shows the superseded `public/component/` path) and
       `quickstart.md`
-- [ ] T065 Specify (in `spec.md`) the theme-management command (D-012): create a new theme from `default`,
-      register it, switch the active theme. Needs a persisted active theme, which does not exist; settle
-      with the owner where it is stored before building
+- [ ] T065 Specify (in `spec.md`) the theme-management command (D-012, D-020): given a name, copy the
+      `default` theme's layout, body and home-page templates and main CSS file into a new theme of that
+      name; register a `theme.themes.<name>` map covering only the copied templates; set `theme.active`
+      to it. Also switch the active theme to an existing one. Open: which config file is written
 - [ ] T066 Implement the command(s) from T065, following the `Console\` guard rule, once T065 is
-      agreed and webware-console placement is recorded (T034)
+      agreed and webware-console placement is recorded (T034). The copy must not overwrite an existing
+      theme, and the name is validated as a single path segment (T063)
 - [ ] T067 Tests for T066 to the 100% line and MSI floors
 - [ ] T068 Admin widget to choose the active theme from the installed themes (D-012), using
       webware-admin's `WidgetInterface`; depends on T065 (installed-theme list and persistence) and
