@@ -141,8 +141,8 @@ Asset files live under `public/` and **never** inside a theme's `templates/` roo
 location. The layout is settled (D-007):
 
 ```
-public/theme/<theme>/{css,js,img,fonts}/...     URL /theme/<theme>/...      theme assets
-public/component/<component>/...               URL /component/<component>/...   component assets (proposed, D-011)
+public/theme/<theme>/{css,js,img,fonts}/...                  URL /theme/<theme>/...                   theme assets
+public/theme/<theme>/component/<component>/...               URL /theme/<theme>/component/<component>/...   component assets, per theme (D-011)
 ```
 
 One directory name per kind: `img`, not `images`. A theme name is a single path segment.

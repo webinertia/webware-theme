@@ -7,7 +7,7 @@
 **Status key** (updated 2026-10-01 against commit `d1c05dc` on `prototype/resolver`): `[X]` is done or
 **Superseded** (a decision replaced it; do not build it), `[ ]` is open. A bold note after the ID says why.
 The decisions behind every note are in `decisions.md` (IDs `D-001`…); read it first, including its
-standing rules. Task IDs are never reused: the next free ID is **T062**.
+standing rules. Task IDs are never reused: the next free ID is **T070**.
 
 Notes that apply to every task: `mago fmt` before any commit; all four gates clean
 (`format --check`, `lint`, `analyze`, `guard`); every test class carries `#[CoversClass]` and
@@ -16,10 +16,10 @@ Notes that apply to every task: `mago fmt` before any commit; all four gates cle
 
 ## Phase 1 — Theme contract
 
-- [ ] T001 **Not built; open decision D-005.** Define `ThemeInterface` in `src/ThemeInterface.php`: the name, the root it resolves from,
+- [X] T001 **Dropped (D-005).** No `ThemeInterface`; config key constants instead (T062). Original text: define `ThemeInterface` in `src/ThemeInterface.php`: the name, the root it resolves from,
       and nothing else. A theme is a directory; identity is its name (`@api`, since consumers
       reference it)
-- [ ] T002 **Not built; D-005.** The single-segment name check is still needed by T043. Implement `Theme` in `src/Theme.php` as a `final readonly` value object with a
+- [X] T002 **Dropped (D-005).** The single-segment name check moves to T043 / T063. Original text: implement `Theme` in `src/Theme.php` as a `final readonly` value object with a
       `fromArray`-style named constructor; validate the name as a single path segment (no separators,
       no `..`) so a configuration value can never escape its root
 - [X] T003 **Superseded (D-006, D-003).** Define the theme root contract: how a package declares `templates/<theme>` as a root, as a
@@ -94,15 +94,15 @@ be injected from configuration.
 Task IDs are assigned in the order they were added, so this phase carries the next free numbers rather
 than displacing the ones below it.
 
-- [ ] T032 **Open; see D-012 and `project-tracking#6`.** Implement the theme installer: given a theme, materialise its assets under
+- [ ] T032 **Re-scoped (D-012): installing belongs to the composer plugin installer** (`project-tracking#6`), not this package. Original text: implement the theme installer: given a theme, materialise its assets under
       `public/theme/<theme>/` from the theme's own source. Nothing here is a build step — it is the one
       place that writes into a served location
 - [ ] T033 **Open; requirements are now in `project-tracking#6`** (symlink in dev, copy in prod, idempotent, removes what a package stopped shipping). Decide and record how far "manage" goes: create only, update when the theme's assets change,
       and what happens on uninstall. Whichever way it goes, the installer owns it rather than leaving
       stale files in `public/`
-- [ ] T034 **Open (D-012).** Decide whether the installer is a console command in this package (registered under
+- [ ] T034 **Re-scoped (D-012).** The *installer* is the composer plugin. The console command is for creating a theme from `default`, registering it and switching the active theme (T065–T067). Whether that command lives in this package (registered under
       `Webware\Console\ConsoleInterface::class`, which makes `webware/webware-console` a dependency, as
-      it is for webware-migration) or an application-level command. Record the choice in `plan.md`
+      it is for webware-migration) or elsewhere is still to record in `plan.md`. Original text: decide whether the installer is a console command in this package (registered under
 
 ## Phase 5 — The convention in the packages
 
@@ -240,6 +240,29 @@ none lives in a component (standing rule 6).
       it when #6 lands; nobody hand-creates files under `public/theme/`
 - [ ] T061 Decide where the home-page block contract lives (D-018), then write its spec and plan in that
       repository. This feature only needs the `default` theme templates that render it (D-019)
+
+## Phase 14 — Owner decisions of 2026-10-01 (D-005, D-011, D-012)
+
+- [ ] T062 Add constants for the known config keys in `ConfigProvider` (`THEME = 'theme'`, `ACTIVE`,
+      `THEMES`, `ASSETS`) and use them in `ThemeResolverFactory` and the tests instead of the string
+      literals (D-005). No new classes
+- [ ] T063 Validate a theme name as a single path segment (no separators, no `..`) at the one place it
+      becomes a path, the asset factory (T043); test it. Do not add a value object (D-005)
+- [ ] T064 Component assets are per theme (D-011): in T042–T043 the asset values for a component live
+      under `theme.assets.<theme>` and resolve to `/theme/<theme>/component/<component>/…`; document the
+      layout in `data-model.md` (it currently shows the superseded `public/component/` path) and
+      `quickstart.md`
+- [ ] T065 Specify (in `spec.md`) the theme-management command (D-012): create a new theme from `default`,
+      register it, switch the active theme. Needs a persisted active theme, which does not exist; settle
+      with the owner where it is stored before building
+- [ ] T066 Implement the command(s) from T065, following the `Console\` guard rule, once T065 is
+      agreed and webware-console placement is recorded (T034)
+- [ ] T067 Tests for T066 to the 100% line and MSI floors
+- [ ] T068 Admin widget to choose the active theme from the installed themes (D-012), using
+      webware-admin's `WidgetInterface`; depends on T065 (installed-theme list and persistence) and
+      belongs in the repository the owner chooses. Not started
+- [X] T069 Done 2026-10-01 for the layout line; the Theme/roots wording is already marked superseded. Update `data-model.md`: replace the `public/component/` layout with the per-theme one (see
+      T064) and drop the superseded Theme/roots wording now that D-005 is settled
 
 ## Verification
 
