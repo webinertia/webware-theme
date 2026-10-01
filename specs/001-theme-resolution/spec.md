@@ -241,10 +241,13 @@ agreements, the four Mago gates, and the MSI floors in `webware-ci.json`.
 - **FR-015**: Creating and managing a theme's asset files MUST be the theme installer's responsibility
   rather than a manual task. Running the installer is what puts a theme's assets under
   `public/theme/<theme>/`; a developer never creates them by hand, and the components' `default` themes
-  need no manual asset step. A component's theme-neutral assets (for example the ACL page JavaScript)
-  are published to `public/component/<component>/` (proposed, D-011). Publishing symlinks in
+  need no manual asset step. A component's assets (for example the ACL page JavaScript) are stored
+  per theme, under `public/theme/<theme>/component/<component>/`, so each theme can publish its own
+  (D-011). Publishing symlinks in
   development, copies in production, is idempotent, and removes what a package no longer ships. The
-  installer's own requirements are tracked in `webinertia/project-tracking#6` (D-012).
+  installer's own requirements are tracked in `webinertia/project-tracking#6` (D-012). Installing is the
+  composer plugin installer's job; creating, registering and switching themes is a command, and choosing
+  one is an admin widget (D-012, tasks T065–T068).
 - **FR-016**: The shipped `default` theme MUST use stock Bootstrap 5.3 markup and spacing, be dark by
   default with a Light/Dark control that persists the choice, and need no build step (D-015).
 - **FR-017**: The two colours of the webinertia logo MUST be the theme's `primary` (`#7e5ae0`) and
