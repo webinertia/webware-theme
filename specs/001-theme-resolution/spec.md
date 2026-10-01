@@ -4,7 +4,10 @@
 
 **Created**: 2026-09-29
 
-**Status**: Draft
+**Status**: In progress. The resolver is built as a prototype (see `decisions.md` section 1); the
+theme-aware asset helper, asset publishing, the default theme's assets and the port of the base
+templates are open (`tasks.md` Phases 10 to 13). Requirements below carry a note where a decision
+changed them; the reasons are in `decisions.md`.
 
 **Input**: User description: "I want to simply build a resolver which will simplify, I hope, also
 supporting the custom template layer for htmx. The benefit is that laminas already provides and will
@@ -29,8 +32,11 @@ every layer.
 
 **In scope:** theme resolution for laminas-view; the directory and naming convention; the default
 theme shipped by packages; the active-theme selection and its configuration; asset name resolution
-through laminas-view's asset helpers; the webware-htmx body/layout layer expressed as ordinary theme
-templates; the extraction of the IMS application's current shell into an `ims` theme.
+through laminas-view's asset helpers, made theme-aware; where theme and component assets are served
+from; the visual baseline of the `default` theme; the port of the base templates of webware-acl,
+webware-admin and webware-usermanager to a neutral `default` theme; the webware-htmx body/layout layer
+expressed as ordinary theme templates; the extraction of the IMS application's current shell and admin
+pages, verbatim, into an `ims` theme.
 
 **Out of scope (explicit):**
 
@@ -43,7 +49,13 @@ templates; the extraction of the IMS application's current shell into an `ims` t
   direction, is expected to be a theme that overrides markup plus an asset-helper entry rather than a
   pipeline.
 - Per-request theme switching. The active theme is a configuration value; nothing in this spec
-  requires resolving a theme from a session, a store, or a request.
+  requires resolving a theme from a session, a store, or a request. (The Light/Dark colour mode is a
+  client-side `data-bs-theme` toggle, not a theme switch.)
+- The home-page content-block contract (a PSR-14 collect event modelled on webware-admin's dashboard
+  widgets). This feature only supplies the `default` theme templates that render it. See `decisions.md`
+  D-018 and D-019.
+- The installer itself. Its requirements live in `webinertia/project-tracking#6`; this spec states only
+  what it must produce (FR-015).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -115,6 +127,46 @@ error; then activate `ims` and confirm the IMS shell renders with its own helper
 
 ---
 
+### User Story 4 - The default theme looks like Webware, not like a framework skeleton (Priority: P2)
+
+A person installs the packages and opens the admin pages. They see stock Bootstrap markup in a dark
+theme built from the two logo colours of the webinertia org, with a Light option, and nothing that
+mentions IMS or a store.
+
+**Why this priority:** a default theme nobody wants to keep makes every install a redesign.
+
+**Independent Test:** with no theme configured, load the ACL overview, the user list and the dashboard
+in a browser, in dark and in light.
+
+**Acceptance Scenarios:**
+
+1. **Given** a first visit, **When** a page renders, **Then** it is dark and the Dark option is the
+   pressed one.
+2. **Given** the Light option is chosen, **When** the page is reloaded, **Then** it is still light.
+3. **Given** any rendered `default` page, **When** its markup is searched, **Then** it contains no
+   `ims-` class or id and no IMS branding.
+
+---
+
+### User Story 5 - The IMS application keeps its look, verbatim (Priority: P3)
+
+The IMS application's admin pages move into the `ims` theme exactly as they were, with their own CSS
+and JavaScript, while the packages move to the neutral `default` theme.
+
+**Why this priority:** it is what lets the components lose the IMS coupling without losing any IMS code.
+
+**Independent Test:** activate `ims` and compare the rendered ACL, user and dashboard markup with what
+the IMS application renders today.
+
+**Acceptance Scenarios:**
+
+1. **Given** `theme.active` is `ims`, **When** the ACL overview renders, **Then** the markup is the
+   original markup and the original script works against it.
+2. **Given** `theme.active` is `default`, **When** the same page renders, **Then** the neutral hooks
+   are present and the component's own script works against them.
+
+---
+
 ### Edge Cases
 
 - The active theme directory does not exist at all — the application still renders from `default`
@@ -123,6 +175,10 @@ error; then activate `ims` and confirm the IMS shell renders with its own helper
   is the same failure an unknown template name has always produced.
 - A theme's configured asset name is not present in the resource map. The asset helper throws on an
   unknown name, so asset names are a vocabulary: themes re-value names, they do not invent them.
+- A theme re-values only some asset names. The rest resolve from `default`, per name, and the URL points
+  at the theme that defined the name.
+- A theme name that is not a single path segment (`a/b`, `..`, empty) is rejected before it is used to
+  build a path or a URL.
 - The active theme is changed in configuration but the aggregated config is cached — a cached
   configuration must be cleared for the switch to take effect, and this must be documented.
 - Two components ship the same template name and different themes are active — resolution must be
@@ -143,8 +199,10 @@ agreements, the four Mago gates, and the MSI floors in `webware-ci.json`.
 - **FR-002**: Templates MUST keep mezzio's namespaced addressing — `<namespace>::<name>`, e.g.
   `app::home-page.phtml`, `layout::default`, `admin::dashboard.phtml`. The theme is never part of the
   address; it selects the first directory segment under `templates/`.
-- **FR-003**: Resolution for a namespace MUST consult the paths that namespace is served from, module by
-  module, and within each module the active theme's directory before `default`.
+- **FR-003** *(revised 2026-10-01, D-002/D-003)*: Resolution MUST consult the active theme's template
+  map before anything else, then the framework's own map and path-stack resolvers. A component's
+  `default` theme is served by the component publishing `templates/default/<namespace>/` under its
+  namespace; the theme map carries only overrides.
 - **FR-004**: Fallback MUST be per template, not per theme: a template the active theme does not ship
   resolves from `default` in the same namespace, and a template no module ships falls through to the
   framework's own resolvers.
@@ -158,13 +216,17 @@ agreements, the four Mago gates, and the MSI floors in `webware-ci.json`.
 - **FR-007**: Every module that ships layouts or templates MUST ship a `default` theme.
 - **FR-008**: The active theme MUST be selectable by a configuration value alone. A module that ships no
   directory for the active theme contributes only its `default`.
-- **FR-009**: Assets MUST be resolved through laminas-view's asset helpers, with theme values
-  overriding entries in the resource map. No request-time asset middleware. Asset files MUST live under
-  `public/` (`/public/theme/<theme>/…`) and never inside a theme's `templates/` root, which is not a
-  served location.
+- **FR-009** *(revised 2026-10-01, D-007 to D-009)*: Assets MUST be resolved through laminas-view's
+  `asset()` helper, made theme-aware by overriding that helper's **factory** (the class is
+  `final readonly`). Values live under `theme.assets.<theme>.<name>`; the laminas-view key the stock
+  factory reads is `view_helper_config.asset.resource_map`. No request-time asset middleware. Asset
+  files MUST live under `public/theme/<theme>/{css,js,img,fonts}/` (URL `/theme/<theme>/…`) and never
+  inside a theme's `templates/` root, which is not a served location.
+- **FR-009a**: The theme-aware helper MUST resolve a name from the active theme, fall back to `default`
+  per name, pass absolute URLs through unchanged, and still throw on a name no theme defines.
 - **FR-010**: A theme MUST work without a build step. Markup and assets are the deliverables.
-- **FR-011**: Module roots MAY be derived from the PSR-4 namespaces registered for that module (its
-  namespace root's sibling `templates/`), with package roots declared by their own `ConfigProvider`.
+- **FR-011** *(superseded 2026-10-01, D-006)*: Module roots derived from PSR-4 namespaces. Replaced by
+  theme maps declared in configuration (`theme.themes`); there is no `roots` list.
 - **FR-012**: The body and the layout MUST each be named by **one** configuration value, and that value
   MUST be a theme-resolvable template name (`body`, `layout`) rather than a path the owning package
   publishes as a map entry. This is what lets a theme point at a body template at all, so the collapse of
@@ -179,14 +241,30 @@ agreements, the four Mago gates, and the MSI floors in `webware-ci.json`.
 - **FR-015**: Creating and managing a theme's asset files MUST be the theme installer's responsibility
   rather than a manual task. Running the installer is what puts a theme's assets under
   `public/theme/<theme>/`; a developer never creates them by hand, and the components' `default` themes
-  need no manual asset step.
+  need no manual asset step. A component's theme-neutral assets (for example the ACL page JavaScript)
+  are published to `public/component/<component>/` (proposed, D-011). Publishing symlinks in
+  development, copies in production, is idempotent, and removes what a package no longer ships. The
+  installer's own requirements are tracked in `webinertia/project-tracking#6` (D-012).
+- **FR-016**: The shipped `default` theme MUST use stock Bootstrap 5.3 markup and spacing, be dark by
+  default with a Light/Dark control that persists the choice, and need no build step (D-015).
+- **FR-017**: The two colours of the webinertia logo MUST be the theme's `primary` (`#7e5ae0`) and
+  `secondary` (`#05a578`) in both colour modes. Text and control colours MUST meet WCAG AA (4.5:1) in
+  both modes; where a brand colour does not, a tint or shade is used for that role only (D-015, D-016).
+- **FR-018**: A component's templates MUST live under `templates/default/<namespace>/` and publish that
+  path under their namespace. In the `default` theme they MUST NOT carry `ims-` classes, ids or
+  branding; styling hooks use neutral prefixes (D-013).
+- **FR-019**: A component's behaviour JavaScript MUST ship with the component, select only by the
+  neutral hooks, and never be part of a theme (D-010). A theme supplies CSS for those hooks.
+- **FR-020**: Every template ported to the `default` theme MUST also exist, verbatim, in the `ims` theme
+  of `webinertia/webware`, with its CSS and JavaScript, so no IMS code is lost and none lives in a
+  component (D-014).
 
 ### Key Entities
 
 - **Theme**: a name plus the root it resolves from. Configuration-driven; identity is the directory
   name.
-- **Theme root**: the directory a theme resolves against in one module — `<module>/templates/<theme>/` —
-  contributed by a package's `ConfigProvider` or derived from a module's registered namespace.
+- **Theme root** *(superseded, D-006)*: there is no theme root entity. A theme is a key in
+  `theme.themes` (address to path) and, for assets, a key in `theme.assets`.
 - **Resolver**: the component that turns a namespaced address (`<namespace>::<name>`) into a path, using
   the paths that namespace is served from, with the active theme's directory before `default`.
 - **Asset name**: a fixed vocabulary entry in the resource map that a theme may re-value.
@@ -214,9 +292,8 @@ agreements, the four Mago gates, and the MSI floors in `webware-ci.json`.
   concern rather than for a service inside it.
 - The runtime dependency is `laminas/laminas-view` alone. `mezzio/mezzio-laminasviewrenderer` and
   `webware/webware-htmx` stay consumers, not dependencies.
-- Which module's path is consulted first when more than one module serves the same namespace is a
-  decision to confirm (presumably the application's own module first), since it decides which of two
-  same-named templates wins.
+- Which module's path is consulted first is **no longer a question** (D-002): themes are address maps
+  merged by the config aggregator, so the later provider wins and `theme.themes` entries override.
 - The default theme's directory name is `default`, which cannot collide with mezzio's internal
   unnamespaced bucket (`__DEFAULT__`, a private constant, unreachable as a template namespace).
 - Configuration merging decides override precedence: integer-keyed lists append (first-registered
@@ -224,5 +301,6 @@ agreements, the four Mago gates, and the MSI floors in `webware-ci.json`.
   therefore the override channel unless provider order is deliberately controlled.
 - `laminas-view` 3.x ships no resolver cache, so anything that touches the filesystem at resolve time
   pays per lookup; this is why FR-005 exists.
-- `.specify/` and `/specs/` are ignored by this repository's `.gitignore` (inherited from the template),
-  so these documents are local until that is revisited.
+- `.specify/` and `/specs/` are **tracked** in this repository on purpose (`tasks.md` T026); only the
+  vendored preset copy under `.specify/presets/` is ignored. An earlier version of this note said the
+  opposite and was wrong.

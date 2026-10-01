@@ -4,9 +4,9 @@
 
 ## For a designer or developer refreshing a client's site
 
-A theme is a directory under a module's `templates/`, holding one subdirectory per template namespace,
-plus the assets the installer puts under `public/theme/<theme>/`. Nothing is compiled, published or
-registered.
+A theme is a key in the `theme.themes` configuration: a map from template address to the file that
+replaces it. Its assets are files under `public/theme/<theme>/`. Nothing is compiled or scanned; a
+template path in the map is used as written and is not checked on disk (D-017).
 
 ```
 src/App/templates/
@@ -26,13 +26,12 @@ segment and is never part of the address. Templates and assets live in different
 served differently — `templates/` is never a served location, so nothing under it can be requested by a
 browser.
 
-1. Create the theme directory beside the module's `default` and copy into it only what the redesign
-   changes, keeping each template under its namespace. Anything you do not copy continues to come from
-   `default`.
-2. Its assets are the installer's job, not yours: run the theme installer and they appear under
-   `public/theme/<theme>/` (exact path shape and filenames still to be settled), with their **names**
-   pointed at them in the resource map — the names are the ones the components already use; you are
-   changing values, not inventing names.
+1. Put the theme's templates in a directory of your choosing (the layout above is the convention) and
+   list each address the theme overrides in `theme.themes.<name>`. Anything not listed continues to
+   come from `default`, address by address.
+2. Its assets go under `public/theme/<theme>/{css,js,img,fonts}/`, and their **names** are pointed at
+   them in `theme.assets.<theme>` (planned, T042; the asset helper does not read it yet) — the names
+   are the ones the components already use; you are changing values, not inventing names.
 3. Activate it:
 
 ```php
@@ -40,8 +39,11 @@ browser.
 return [
     'theme' => [
         'active' => 'acme',
-        'roots'  => [
-            ['component' => 'app', 'path' => __DIR__ . '/../../templates/acme'],
+        'themes' => [
+            'acme' => [
+                'app::home-page.phtml' => __DIR__ . '/../../src/App/templates/acme/app/home-page.phtml',
+                'layout::default'      => __DIR__ . '/../../src/App/templates/acme/layout/default.phtml',
+            ],
         ],
     ],
 ];

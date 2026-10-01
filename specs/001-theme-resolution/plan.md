@@ -1,19 +1,33 @@
 # Implementation Plan: Theme Resolution for Webware Packages
 
-**Feature**: `specs/001-theme-resolution/spec.md` · **Branch**: `001-theme-resolution` · **Date**: 2026-09-29
+**Feature**: `specs/001-theme-resolution/spec.md` · **Branch**: `prototype/resolver` · **Date**: 2026-09-29 · **Revised**: 2026-10-01
+
+> **Read `decisions.md` first.** It holds the current state, the standing rules and the decision log
+> (D-001…). Where this plan and a decision disagree, the decision is newer.
+
+## Implementation status (2026-10-01)
+
+| Piece | State |
+|---|---|
+| `ThemeResolver`, `ThemeResolverFactory`, `AggregateResolverFactory`, `ConfigProvider` wiring | **Built** (`d1c05dc`); 7 unit + 5 integration tests; Mago clean |
+| `Theme` / `ThemeInterface`, PSR-4 root derivation, `theme.roots` | **Not built and superseded or open** (D-005, D-006) |
+| Theme-aware `asset()` helper (`AssetFactory`) | Not built; `tasks.md` Phase 10 |
+| Asset publishing / installer | Not built; requirements in `project-tracking#6` (D-012) |
+| Default theme assets and the port of the three components' templates | Open; `tasks.md` Phases 11 and 12 |
 
 ## Summary
 
-Ship `webware/webware-theme`: a theme contract, a resolver that assembles the per-namespace paths a
-template is served from (active theme before `default`) with per-template fallback, and the convention
-that a theme is a directory of namespace directories under a module's `templates/`.
-Packages contribute roots and asset names through their `ConfigProvider`; applications (and client
-modules) contribute theirs as configuration, with module roots derivable from registered PSR-4
-namespaces. No middleware, no build step, no database.
+Ship `webware/webware-theme`: a resolver that answers an address from theme-keyed maps
+(`theme.themes[<theme>][<address>]`, active theme injected, `default` as the per-address fallback), a
+theme-aware `asset()` helper, and the convention that a component's own default theme is its
+`templates/default/<namespace>/` published under its namespace. Packages contribute their default
+templates through their `ConfigProvider`; applications contribute theme maps and asset values as
+configuration. No middleware, no build step, no database.
 
 One consumer change is a **prerequisite**, because a resolver can only resolve a name it is given: the
 package that layers the body and layout (webware-htmx) must name each with one configuration value
-(Phase 6, T019–T021 of `tasks.md`, and the required subset of webinertia/webware-htmx#21). Everything else
+(Phase 6, T039–T041 of `tasks.md`, and the required subset of webinertia/webware-htmx#21; the work is
+PR `webinertia/webware-htmx#22`). Everything else
 in that RFC is enabled by this feature's convention but not required by it.
 
 ## Technical Context
@@ -48,7 +62,10 @@ All measured in `webinertia/webware` against the installed `laminas/laminas-view
 | `AggregateResolver::resolve()` `continue`s on `false`, returns the first hit | `laminas-view/src/Resolver/AggregateResolver.php` | Per-template fallback is free between resolvers — the hook the design uses |
 | No `ResolveCache` anywhere in `laminas-view` 3.x `src` | grep, 2026-09-29 | Nothing memoizes resolution; the resolver memoizes its own results |
 | `ConfigAggregator::mergeArray()`: `is_int($key)` appends; string keys replace and recurse | `laminas-config-aggregator/src/ConfigAggregator.php` | Maps are the override channel (later wins); path lists give the first-registered provider priority |
-| `Laminas\View\Helper\Asset::__invoke()` throws on an unknown name; `resource_map` is string-keyed | `laminas-view/src/Helper/Asset.php` | Asset names are a fixed vocabulary; themes re-value names and cannot invent them (FR-009) |
+| `Laminas\View\Helper\Asset::__invoke()` throws on an unknown name; the class is `final readonly` and is built once by `AssetFactory` from `view_helper_config.asset.resource_map` (not `view_manager.asset`, as earlier drafts said) | `laminas-view/src/Helper/Asset.php`, `Helper/Service/AssetFactory.php`; re-measured 2026-10-01 | Asset names are a fixed vocabulary (FR-009). Theme awareness is a factory override that builds a merged map (D-008), not a subclass |
+| `webware/public/.htaccess` serves any existing file, link or **directory** before routing | `webware/public/.htaccess` | A bare `/<theme>/` directory at the web root would shadow a route of that name; assets live under `/theme/<theme>/` (D-007) |
+| The ACL page's behaviour is ~400 lines of the IMS app's `public/assets/js/app.js` (from line 301), selecting by `ims-acl-*` ids and classes and building markup strings with them; its styling is 84 rules in `public/assets/css/custom.css`; the component templates contain no script that selects by those names | IMS repo, read-only; 2026-10-01 | A neutral rename must move markup, script and CSS together; the script ships with the component (D-010, D-013) |
+| `webware/vendor/webware/webware-theme` is a symlink to the sibling clone and the app's `composer.lock` pins it as a path dist at the prototype commit | `webware/composer.lock`; 2026-10-01 | The app works only where that clone is on `prototype/resolver`; the resolver must reach `1.0.x` by PR |
 | `LaminasRendererFactory` reads five keys for layout/body (`templates.layout`, `templates.body`, `templates.default_layout`, `templates.default_body`, `view_manager.default_layout`); first non-empty is the layout, last is the body | `webware-htmx/src/View/LaminasRendererFactory.php` | FR-012 collapses this to two theme-resolved names |
 | `webware-htmx/templates/body/default.phtml` is the IMS shell and calls `$this->imsMessenger()`, a helper defined nowhere in the app repo or in `webware/vendor` | measured 2026-09-29 | US3 exists: the shell moves to `ims`, `default` becomes helper-clean (FR-013) |
 
@@ -66,6 +83,7 @@ and the package's own coverage metadata requirements.
 
 ```
 specs/001-theme-resolution/
+├── decisions.md     # START HERE: state, standing rules, decision log, next actions
 ├── spec.md          # this feature's requirements
 ├── plan.md          # this file
 ├── tasks.md         # dependency-ordered task list
@@ -74,20 +92,21 @@ specs/001-theme-resolution/
 └── quickstart.md    # using a theme from both sides: theme author and package author
 ```
 
-Note: `.specify/` and `/specs/` are ignored by this repository's `.gitignore` (inherited from
-`repo-template`), so these documents are local unless that is revisited.
+Note: `.specify/` and `/specs/` are **tracked** in this repository (`tasks.md` T026); only the vendored
+preset under `.specify/presets/` is ignored.
 
 ### Source Code (repository root)
 
 ```
 src/
-├── ConfigProvider.php              # wiring entry point; already present, currently empty
-├── ThemeInterface.php              # a theme: name + root + optional overrides
-├── Theme.php                       # value object implementation (final readonly)
+├── ConfigProvider.php              # BUILT: registers the resolver and the aggregate factories
+├── ThemeInterface.php              # NOT BUILT, open decision D-005
+├── Theme.php                       # NOT BUILT, open decision D-005 (the name check is still needed by T043)
 ├── Resolver/
-│   ├── ThemeResolver.php           # per-namespace paths, active theme before default, memoized
-│   └── Container/ThemeResolverFactory.php
-├── Installer/
+│   ├── ThemeResolver.php           # BUILT: theme-keyed map lookup, active theme then default
+│   └── Container/ThemeResolverFactory.php   # BUILT (and AggregateResolverFactory.php beside it)
+├── View/Helper/Container/AssetFactory.php   # PLANNED (T043): theme-aware asset() factory (D-008)
+├── Installer/                      # OPEN (D-012): may live in the Webware installer instead
 │   ├── ThemeInstaller.php          # creates and manages a theme's assets under public/theme/<theme>/
 │   └── Container/ThemeInstallerFactory.php
 ├── Console/                        # only if the installer is a command here (T034)
@@ -113,6 +132,8 @@ installed asset set look like?".
 
 | Deviation | Why | What it costs |
 |---|---|---|
-| Resolution consults theme-aware paths or maps rather than the framework's `templates.paths` in provider order | FR-005 (no filesystem walk per lookup) plus the measured asymmetry: integer-keyed path lists append, so the first-registered provider wins a same-named file and a theme could not win | Either construction must be built at boot (a scan or a manifest), so a theme that changes on disk needs it rebuilt — unless the maps are keyed by theme, which makes the active theme a lookup instead of a build-time fact. Prototyped in Phase 2b |
+| Resolution consults theme-keyed maps rather than the framework's `templates.paths` in provider order | FR-005 (no filesystem walk per lookup) plus the measured asymmetry: integer-keyed path lists append, so the first-registered provider wins a same-named file and a theme could not win | The active theme is a lookup-time fact, no build or scan. The cost: every overridden address must be listed in config (D-002 settled this after the prototype) |
+| The asset helper is made theme-aware by replacing its factory, not by subclassing | `Asset` is `final readonly` and built once from a flat map (D-008) | The factory must be registered after `Mezzio\LaminasView\ConfigProvider` and the active theme is fixed per process (no per-request themes) |
+| A component's behaviour JavaScript ships with the component, not the theme (D-010) | The ACL page's script selects by the markup's hooks and builds markup strings with them | Components need an asset publishing path (D-011, D-012) the app does not have yet |
 | The resolver is a `ResolverInterface` instead of a renderer modification | The previous iteration modified the renderer and pushed paths onto its stack; keeping resolution out of the renderer keeps `webware-htmx` free to own body/layout layering | Resolution and rendering are configured in two places, and their interaction needs an integration test |
 | Theme identity is the directory name, not a registry entry | It is the convention that makes a redesign a directory of files, and it keeps the whole thing configuration-only (FR-006) | Two packages cannot ship different themes under the same name, and there is no per-theme metadata beyond the directory |

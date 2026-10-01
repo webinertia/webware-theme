@@ -63,7 +63,8 @@ provider order is not relied upon as an override mechanism.
 
 ## Asset names are a vocabulary, not a fallback chain
 
-`Laminas\View\Helper\Asset` is a `final readonly` lookup over `view_manager.asset.resource_map` and
+`Laminas\View\Helper\Asset` is a `final readonly` lookup over `view_helper_config.asset.resource_map`
+(earlier drafts said `view_manager.asset`, which is wrong; D-009) and
 **throws** `InvalidArgumentException` on a name that is not present. Templates fall through; assets do
 not. So a theme re-values names that components define, and cannot introduce or rename them.
 
@@ -106,11 +107,56 @@ with Tailwind bridges later via asset helpers. Consequences that shaped the desi
 - Per-package defaults plus per-theme overrides mean an application must be able to have *two* sets of
   markup on disk at once, which is why the default theme is a directory rather than a fallback file.
 
-## Open items
+## Decisions taken after the prototype (2026-10-01)
 
-- Cross-module order for a shared namespace is assumed (the application's own module first), not yet
-  exercised against a real second module.
-- Whether a theme root that must be enumerated on disk is scanned at map-build time or declared in a
-  manifest is a planning decision (T008 in `tasks.md`).
-- The `ims` theme extraction has not been attempted in the application, so SC-005 (byte-identical
-  markup) is untested.
+Measured or settled once the resolver existed; the IDs point into `decisions.md`.
+
+- **Asset layout `/theme/<theme>/{css,js,img,fonts}` (D-007).** `public/.htaccess` serves an existing
+  file, link or directory before it rewrites to `index.php`. A theme directory at the web root would
+  therefore shadow a route of the same name, and `/admin` or `/user` are routes. One fixed prefix also
+  gives the web server a single place for cache headers.
+- **The helper is a factory override (D-008).** `AssetFactory::__invoke()` reads
+  `view_helper_config.asset.resource_map` and returns `new Asset($map)`; the class has no setter and no
+  theme concept. Replacing the factory and handing it a merged map keeps the stock helper, its
+  `InvalidArgumentException` on unknown names, and its caller-facing API.
+- **Component JavaScript cannot live in a theme (D-010).** The ACL page's behaviour is the "ACL Wizard
+  controller" in the IMS app's `public/assets/js/app.js`: lines 301 to 704 of a 704-line file. It selects
+  by `ims-acl-*` ids and classes (`#ims-acl-route-search`, `.ims-acl-route-entry`,
+  `.ims-acl-grant-card`, `#ims-acl-wiz-next`, `#ims-acl-rule-offcanvas`), reads `data-acl-filter`,
+  `data-wizard-action`, `data-rules-panel` and `data-acl-step-grant`, and builds markup strings that
+  contain `ims-acl-*` classes. The component templates have no inline script that selects by those
+  names (checked with `querySelector`, `classList`, `closest` and `getElementById`).
+- **The styling is 84 rules in IMS `public/assets/css/custom.css`** (739 lines) for the `ims-acl-*`,
+  `ims-widget-*`, `ims-badge-*`, `ims-col-*` and `ims-rules-*` families. Several hard-code Bootstrap's
+  RGB values (the method pills use Bootstrap's success green and blue). They become palette tokens in
+  the default theme; the HTTP-method and privilege colours stay semantic (D-016).
+- **Name collision (D-013).** Stripping `ims-` from `ims-col-name` and friends in the usermanager list
+  would produce `col-name`, which collides with Bootstrap's `.col-*` grid classes. Use `list-col-*`.
+- **Counts in the three components' templates.** webware-acl: 8 templates, `ims-` hooks concentrated in
+  `admin-acl.phtml` (about 37) and `partials/protect-route-wizard.phtml` (about 30), plus 6 in
+  `admin-widget.phtml`. webware-admin: 1 template, none. webware-usermanager: 8 templates, five hooks
+  each in `admin-widget.phtml` and `list-users.phtml`; the auth pages are already neutral (PR #69).
+- **The IMS home page is not worth porting.** `ims/app/home-page.phtml` is the Mezzio skeleton welcome
+  page (Pico-style `article` and `grid` markup, Font Awesome icons). The part of IMS worth porting is the
+  shell, `ims/body/default.phtml` (156 lines): navbar, the `main`/`admin`/`user` navigation containers
+  and the messenger.
+- **The home page's intended model** is webware-admin's: `DashboardMiddleware` dispatches a mutable
+  `RegisterWidgetEvent`, listeners add `WidgetInterface` objects (`title`, `resourceId`, `privilege`,
+  `template`, `order`), `AclWidgetFilterIterator` filters them by the user's roles, the handler renders
+  `admin::dashboard`, which loops `$this->partial($widget->template, $widget)`. A public page needs a
+  `region` the admin widget does not have (D-018).
+- **The default theme's colours (D-015).** Decoded from the org avatar: purple `#7e5ae0`, green
+  `#05a578`. Contrast: white on purple 4.74:1; purple text on Bootstrap's dark body 3.25:1 (so dark-mode
+  text uses `#b29cec` at 6.50:1 and dark-mode outline buttons `#987be6` at 4.63:1); white on green
+  3.15:1 (so green buttons use black text at 6.66:1 and light-mode green text `#048460` at 4.69:1).
+  Bootstrap 5.3.8 compiled components hard-code their blue, so tokens are restated per component in
+  `default-theme/css/theme.css`.
+
+## Open items (revised 2026-10-01)
+
+- Cross-module order for a shared namespace is **resolved** (D-002): theme maps are config and the
+  config merge decides, later wins.
+- Map entries are trusted and not stat-checked (**decided**, D-017; this was T008).
+- The `ims` theme extraction is **partly done** in `webinertia/webware` (layout, body, home page, error
+  pages and the four user pages are in `src/App/templates/ims/`); the admin pages are not, so SC-005
+  (byte-identical markup) is untested for them (T058).
