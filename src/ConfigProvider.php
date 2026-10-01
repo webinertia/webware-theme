@@ -44,7 +44,7 @@ use Webware\Theme\Resolver\ThemeResolver;
 final class ConfigProvider
 {
     /** @return DependenciesConfig */
-    private function getDependencies(): array
+    public function getDependencies(): array
     {
         return [
             'factories' => [

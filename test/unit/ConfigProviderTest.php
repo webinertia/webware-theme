@@ -26,8 +26,22 @@ use Webware\Theme\Resolver\ThemeResolver;
 
 #[CoversClass(ConfigProvider::class)]
 #[CoversMethod(ConfigProvider::class, '__invoke')]
+#[CoversMethod(ConfigProvider::class, 'getDependencies')]
 final class ConfigProviderTest extends TestCase
 {
+    #[Test]
+    public function getDependenciesProvidesTheResolverAndTheAggregateFactories(): void
+    {
+        $expected = [
+            'factories' => [
+                ThemeResolver::class     => ThemeResolverFactory::class,
+                AggregateResolver::class => AggregateResolverFactory::class,
+            ],
+        ];
+
+        static::assertSame($expected, new ConfigProvider()->getDependencies());
+    }
+
     #[Test]
     public function providesTheResolverAndTheAggregateFactories(): void
     {
