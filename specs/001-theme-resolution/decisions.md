@@ -89,10 +89,13 @@ contradicted; confirm if you disagree), **Proposed** (needs the owner), **Open**
    command and widget (D-012) need a persisted active theme; settled 2026-10-01: the command writes an
    **autoloaded config file** named `theme.{theme-name}.global.php` (owner: "The filename will be
    theme.{theme-name}.global.php"). The
-   **admin widget never creates a theme**: it only switches between already installed themes. Open
-   only: how the widget changes `theme.active`, given that each theme has its own file (autoload files
-   merge in glob order and the later file wins a shared key, so two files that both set `active` would
-   conflict).
+   **admin widget never creates a theme**: it only switches between already installed themes.
+   **`theme.active` lives in `theme.settings.global.php`**, a settings file for themes that can hold
+   other theme settings later (owner, 2026-10-01). Autoload files merge in glob order and the later
+   file wins a shared key, so a per-theme file must not set `active`: otherwise every non-active
+   theme's file would need editing on a switch. The command (creating) and the widget (switching)
+   both write `theme.active` in `theme.settings.global.php`; a per-theme file holds only that theme's
+   `theme.themes.<name>` map (and its assets).
 
 ## 5. Gotchas that cost time already
 
