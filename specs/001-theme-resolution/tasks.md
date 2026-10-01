@@ -198,7 +198,7 @@ Why: laminas-view's `Asset` helper is `final readonly` and is built once from
 - [ ] T051 Extend the mockup with the shell: navbar with the three navigation areas (`main`, `admin`,
       `user`), footer, toast container for the messenger, and the Light/Dark control. Check each page in
       both modes
-- [ ] T052 Port the CSS the three components need (the `ims-acl-*`, `ims-widget-*`, `ims-badge-*` and
+- [X] T052 **Done in `webinertia/default-theme#1` (open):** the ACL page, wizard and dashboard widget rules are in `css/theme.css` under the neutral names, with Bootstrap tokens instead of fixed dark-mode colours (the selected wizard grant cards no longer force white text, which was unreadable in light mode). The usermanager `list-col-*` hooks have no rules in the IMS CSS, so none were ported. Original text: Port the CSS the three components need (the `ims-acl-*`, `ims-widget-*`, `ims-badge-*` and
       `ims-col-*` rules, 84 in IMS `public/assets/css/custom.css`) into `default-theme/css/` with the
       neutral class names from D-013 and the palette tokens. Keep HTTP-method and privilege colours on
       Bootstrap's semantic colours (D-016); replace hard-coded Bootstrap RGB values with tokens
@@ -211,7 +211,7 @@ Scope: webware-acl, webware-admin, webware-usermanager. Everything IMS-specific 
 into the `ims` theme first; the `default` copy then loses the `ims-` coupling. No IMS code is lost and
 none lives in a component (standing rule 6).
 
-- [ ] T054 webware-usermanager: land PR #69 (auth pages already neutral and under
+- [X] T054 **Done in `webinertia/webware-usermanager#69` (open, not merged):** the `ims-widget-*` hooks are `widget-*` and the `ims-col-*` hooks are `list-col-*`. Original text: webware-usermanager: land PR #69 (auth pages already neutral and under
       `templates/default/user/`), then replace the remaining `ims-widget-*` and `ims-col-*` hooks in
       `admin-widget.phtml` and `list-users.phtml` (five each). Use `list-col-*`, never `col-*` (D-013)
 - [X] T055 **Done in `webinertia/webware-acl#70` (open, not merged).** The move and the hook rename are committed. Original text: webware-acl: move `templates/acl` to `templates/default/acl`, update
@@ -226,7 +226,7 @@ none lives in a component (standing rule 6).
       served location (D-011, D-012)
 - [X] T057 **Done in `webinertia/webware-admin#42` (open, not merged).** Original text: webware-admin: move `templates/admin` to `templates/default/admin` and update the template
       path and its test (the dashboard is 14 lines and already free of `ims` markup)
-- [ ] T058 `webinertia/webware`: copy the verbatim originals (from each component's git history or the IMS
+- [X] T058 **Done in `webinertia/webware#7` (open, not merged):** 13 verbatim originals (eight acl, one admin and four usermanager templates) copied from each component's `origin/1.0.x` into `src/App/templates/ims/<namespace>/` and mapped in `theme.global.php`; the IMS `custom.css`, `app.js` and `system.messenger.js` are in `public/theme/ims/` and registered under `theme.assets.ims`, and the ims layout reads them through `asset()`. Original text: `webinertia/webware`: copy the verbatim originals (from each component's git history or the IMS
       repository) into `src/App/templates/ims/<namespace>/` and map them in the `ims` block of
       `config/autoload/theme.global.php`. Include the IMS CSS and JS with that theme
 - [ ] T059 Verify in a browser with the `default` theme active, dark and light: the ACL overview, roles,
