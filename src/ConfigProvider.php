@@ -25,7 +25,7 @@ namespace Webware\Theme;
 final class ConfigProvider
 {
     /** @return array<string, mixed> */
-    private function getDependencies(): array
+    public function getDependencies(): array
     {
         return [
             'factories' => [],
