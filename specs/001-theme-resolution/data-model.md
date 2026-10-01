@@ -13,7 +13,7 @@ Identity is the directory name. There is no registry and no per-theme metadata f
 | Field | Type | Rules |
 |---|---|---|
 | `name` | `non-empty-string` | A single path segment: no directory separators, no `..`, not empty. It is used as a directory name under `templates/`, so anything else is a path-escape (T002) |
-| `root` | `non-empty-string` | Absolute path to the theme's directory in one module: `<module>/templates/<name>`. A theme usually has one root per module that ships or overrides templates |
+| `root` | — | **Superseded (D-006):** there is no root field. A theme is a key in `theme.themes` (template overrides) and in `theme.assets` (asset values) |
 
 `default` is the reserved name: every module that ships templates ships `default`, and it is the fallback
 consulted after the active theme. It cannot collide with mezzio's internal unnamespaced bucket, which is
@@ -52,7 +52,7 @@ within each module the active theme's directory before `default` — and address
 Per-template fallback falls out of the ordering: a template the active theme does not ship resolves from
 `default`, and the framework's own resolvers take anything not theme-owned at all.
 
-Two things are decisions rather than open code:
+Both questions below are **settled** (D-002, D-003). The list is kept so the alternatives stay on record:
 
 - **Module order** for a namespace served by more than one module — presumably the application's own
   module first.
@@ -73,7 +73,7 @@ Two things are decisions rather than open code:
   point today; the key of a path list is the namespace, and its integer-keyed lists append in provider
   order, so the first-registered path wins a same-named file.
 
-## Theme root
+## Theme root *(superseded, D-006; kept for history)*
 
 A directory a theme resolves against in one module, plus where it came from.
 
@@ -96,16 +96,17 @@ by controlling provider order.
 ```
 theme
 ├── active            # the theme name; absent means `default`
-├── roots             # list<ThemeRoot>, ordered
-└── templates         # map<template name, path> contributed by the active theme
-view_manager
-└── asset               # laminas-view's own key, published by components
-    └── resource_map    # map<asset name, url|path>; themes re-value, never introduce
+├── themes            # map<theme, map<address, absolute path>>: overrides only (BUILT)
+└── assets            # map<theme, map<asset name, relative path | absolute URL>> (PLANNED, T042)
+view_helper_config
+└── asset               # laminas-view's own key; its stock AssetFactory reads it (D-009)
+    └── resource_map    # flat map<asset name, url>; the theme-aware factory builds it at runtime (D-008)
 ```
 
 Merge behaviour this shape depends on, measured in `ConfigAggregator::mergeArray()`: string keys replace
-with later-wins (so `templates` and `resource_map` overrides are automatic), while integer keys append
-(so a `roots` list accumulates in provider order and cannot be reordered by a later provider).
+with later-wins (so `themes` and `assets` overrides are automatic), while integer keys append
+(so an integer-keyed list accumulates in provider order and cannot be reordered by a later provider,
+which is why this shape has none).
 
 ## Resolver
 
@@ -136,10 +137,17 @@ lazy resolution — which makes `webware/webware-console` a dependency of this p
 
 ## Asset name
 
-Asset files live under `public/` — `/public/theme/<theme>/…` — and **never** inside a theme's `templates/`
-root, which is not a served location. The exact path shape and filenames are still to be settled.
+Asset files live under `public/` and **never** inside a theme's `templates/` root, which is not a served
+location. The layout is settled (D-007):
+
+```
+public/theme/<theme>/{css,js,img,fonts}/...                  URL /theme/<theme>/...                   theme assets
+public/theme/<theme>/component/<component>/...               URL /theme/<theme>/component/<component>/...   component assets, per theme (D-011)
+```
+
+One directory name per kind: `img`, not `images`. A theme name is a single path segment.
 
 | Field | Type | Rules |
 |---|---|---|
 | `name` | `non-empty-string` | Defined by a component; a fixed vocabulary. The `Asset` helper throws on anything unknown |
-| `value` | `non-empty-string` | A URL or a base-path-relative path. A theme overrides the value, including a CDN URL for a framework stylesheet |
+| `value` | `non-empty-string` | A path relative to the defining theme's directory (`css/theme.css`) or an absolute URL. A theme overrides the value, including with a CDN URL for a framework stylesheet |

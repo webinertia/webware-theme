@@ -1,8 +1,8 @@
 # webware/webware-theme
 
-Theme support for Webware applications: a theme is a directory under a component's
-`templates/`, resolved by name through laminas-view, with per-template fallback to the
-`default` theme that every component ships.
+Theme support for Webware applications. A theme is a set of template and asset overrides; the active theme
+is consulted first and `default` answers for everything it does not override. Template lookups are a
+single array read, with no filesystem walk.
 
 [![PHP Version](https://img.shields.io/packagist/php-v/webware/webware-theme)](https://packagist.org/packages/webware/webware-theme)
 [![Latest Version](https://img.shields.io/packagist/v/webware/webware-theme)](https://packagist.org/packages/webware/webware-theme)
@@ -11,44 +11,63 @@ Theme support for Webware applications: a theme is a directory under a component
 [![codecov](https://codecov.io/gh/webinertia/webware-theme/graph/badge.svg)](https://codecov.io/gh/webinertia/webware-theme)
 [![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fwebinertia%2Fwebware-theme%2F1.0.x)](https://dashboard.stryker-mutator.io/reports/github.com/webinertia/webware-theme/1.0.x)
 
-## The convention
+## Quickstart
 
-A theme is a directory named for the theme, directly inside a module's `templates/` directory, holding one
-subdirectory per template namespace:
-
-```
-src/App/templates/
-├── default/                  # every module that ships templates ships this one
-│   ├── app/home-page.phtml          -> app::home-page.phtml
-│   ├── layout/default.phtml         -> layout::default
-│   └── admin/dashboard.phtml        -> admin::dashboard.phtml   (a vendor template, overridden here)
-└── acme/                     # a theme, same layout of files
-    └── layout/default.phtml         -> layout::default
-```
-
-Addresses stay mezzio's namespaced ones — `<namespace>::<name>` — and the theme selects the first
-directory segment, so it is never part of the address and a component's references to its own templates
-survive a theme change. Resolution consults the paths a namespace is served from, the active theme's
-directory before `default`, and falls back **per template**, so a theme that overrides one layout leaves
-every other template coming from `default`. A module overrides another module's template by placing that
-namespace under its own theme directory — which is how an application restyles a vendor template without
-touching the package that ships it.
-
-That is the whole mechanism: a redesign is a directory of templates plus the assets that go with it, not
-a fork of every package. Templates resolve from `templates/`; assets are served from `public/theme/<theme>/`
-(a theme's `templates/` directory is never a served location); nothing is compiled, published or watched.
-
-## Installation
+1. Install it and register the provider **after** `Mezzio\LaminasView\ConfigProvider`:
 
 ```bash
 composer require webware/webware-theme
 ```
 
-Register the `ConfigProvider` in your Mezzio application config aggregator:
-
 ```php
+Mezzio\LaminasView\ConfigProvider::class,
 Webware\Theme\ConfigProvider::class,
 ```
+
+2. Describe a theme in any autoloaded config file, for example `config/autoload/theme.acme.global.php`:
+
+```php
+use Webware\Theme\ConfigProvider;
+
+return [
+    ConfigProvider::THEME => [
+        ConfigProvider::ACTIVE => 'acme',
+        ConfigProvider::THEMES => [
+            'acme' => [
+                // only the addresses this theme overrides
+                'layout::default' => __DIR__ . '/../../templates/acme/layout/default.phtml',
+            ],
+        ],
+        ConfigProvider::ASSETS => [
+            'acme' => ['theme.css' => 'css/acme.css'],
+        ],
+    ],
+];
+```
+
+3. Put the asset file at `public/theme/acme/css/acme.css`, and use it in a template:
+
+```php
+<link rel="stylesheet" href="<?= $this->asset('theme.css') ?>">
+```
+
+`layout::default` now comes from the `acme` theme and every other address from `default`;
+`asset('theme.css')` returns `/theme/acme/css/acme.css`, and a name `acme` does not define falls back to the
+`default` theme's file. Anything not listed in a theme falls back to `default` per address and per name.
+Addresses stay mezzio's namespaced ones (`<namespace>::<name>`) and never contain a theme name, so a
+component's references to its own templates survive a theme change.
+
+## Documentation
+
+| Document | Contents |
+|---|---|
+| [Installation](docs/v1/installation.md) | Requirements, provider order, what the provider registers |
+| [Configuration](docs/v1/configuration.md) | The `theme.active`, `theme.themes` and `theme.assets` keys and their rules |
+| [Template resolution](docs/v1/template-resolution.md) | How `ThemeResolver` answers, and the resolver order |
+| [Assets](docs/v1/assets.md) | The theme-aware `asset()` helper, URL layout, theme-name rules |
+
+Not built yet: publishing assets into `public/`, the command that creates and switches themes, and the
+admin widget. They are specified in `specs/001-theme-resolution/`.
 
 ## Design
 
