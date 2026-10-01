@@ -117,7 +117,7 @@ than displacing the ones below it.
 
 ## Phase 6 — The htmx configuration prerequisite (FR-012)
 
-- [ ] T039 **In progress: `webinertia/webware-htmx#22` is open** (merge state was `UNKNOWN` on 2026-10-01, re-check). Make webware-htmx read **one key per value** for the body and the layout, whose values are
+- [X] T039 **Done: `webinertia/webware-htmx#22` merged and `1.0.0-alpha.1` tagged by the owner on 2026-10-01.** Original text (merge state was `UNKNOWN`, re-check): Make webware-htmx read **one key per value** for the body and the layout, whose values are
       theme-resolvable template names, replacing the five-key lookup and the package-published
       `templates.map['body::default']` entry. This is the only part of webinertia/webware-htmx#21 this
       feature needs: without it a theme has no name to resolve for the body
@@ -214,17 +214,17 @@ none lives in a component (standing rule 6).
 - [ ] T054 webware-usermanager: land PR #69 (auth pages already neutral and under
       `templates/default/user/`), then replace the remaining `ims-widget-*` and `ims-col-*` hooks in
       `admin-widget.phtml` and `list-users.phtml` (five each). Use `list-col-*`, never `col-*` (D-013)
-- [ ] T055 webware-acl: move `templates/acl` to `templates/default/acl`, update
+- [X] T055 **Done in `webinertia/webware-acl#70` (open, not merged).** The move and the hook rename are committed. Original text: webware-acl: move `templates/acl` to `templates/default/acl`, update
       `ConfigProvider::getTemplates()` and its test. **Started on branch `feat/default-theme-templates`
       in the local clone, uncommitted as of 2026-10-01: check `git status` before redoing it.** Then
       rename the hooks per D-013 in `admin-acl.phtml` (about 37 occurrences), `admin-widget.phtml` and
       `partials/protect-route-wizard.phtml` (about 30). Change ids, classes, `data-*` references and
       the markup strings built in JavaScript together
-- [ ] T056 webware-acl: extract the ACL page controller (IMS `public/assets/js/app.js` lines 301 to 704,
+- [X] T056 **Done in `webinertia/webware-acl#70`:** `assets/default/js/acl.js`, registered as the `acl.js` asset of the default theme (`theme.assets.default`, value `component/acl/js/acl.js`) and loaded from `admin-acl.phtml`; webware-acl requires `webware/webware-theme`. The package source layout is `assets/<theme>/…`, published to `public/theme/<theme>/component/acl/…` (nothing publishes it yet, T060). Original text: webware-acl: extract the ACL page controller (IMS `public/assets/js/app.js` lines 301 to 704,
       "ACL Wizard controller") into webware-acl as plain JavaScript with neutral selectors and no build
       step, shipped as a **component** asset (D-010), and register its asset name. Needs Phase 10 and a
       served location (D-011, D-012)
-- [ ] T057 webware-admin: move `templates/admin` to `templates/default/admin` and update the template
+- [X] T057 **Done in `webinertia/webware-admin#42` (open, not merged).** Original text: webware-admin: move `templates/admin` to `templates/default/admin` and update the template
       path and its test (the dashboard is 14 lines and already free of `ims` markup)
 - [ ] T058 `webinertia/webware`: copy the verbatim originals (from each component's git history or the IMS
       repository) into `src/App/templates/ims/<namespace>/` and map them in the `ims` block of
