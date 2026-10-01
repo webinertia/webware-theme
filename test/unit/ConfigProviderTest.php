@@ -22,8 +22,15 @@ use Webware\Theme\ConfigProvider;
 
 #[CoversClass(ConfigProvider::class)]
 #[CoversMethod(ConfigProvider::class, '__invoke')]
+#[CoversMethod(ConfigProvider::class, 'getDependencies')]
 final class ConfigProviderTest extends TestCase
 {
+    #[Test]
+    public function getDependenciesIsAnEmptyFactoryMap(): void
+    {
+        self::assertSame(['factories' => []], new ConfigProvider()->getDependencies());
+    }
+
     #[Test]
     public function providesAnEmptyDependencyFactoryMap(): void
     {
