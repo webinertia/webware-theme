@@ -190,15 +190,15 @@ Why: laminas-view's `Asset` helper is `final readonly` and is built once from
 
 ## Phase 11 — The default theme's assets (repository `webinertia/default-theme`; D-015, D-016)
 
-- [ ] T049 Land `webinertia/default-theme#1` (the Bootstrap 5.3.8 token overrides in `css/theme.css` and
+- [X] T049 **Superseded (D-021).** `webinertia/default-theme` is a scratch space, not a deliverable; its PR is not to be merged as a package. Original text: Land `webinertia/default-theme#1` (the Bootstrap 5.3.8 token overrides in `css/theme.css` and
       `mockup/index.html`). Owner review; do not merge without them
-- [ ] T050 Decide how the default theme is packaged so the installer can publish it to
+- [X] T050 **Answered (D-021): nothing is packaged.** The default theme ships with `webware/webware` (its stylesheet) and with each component (its templates and assets). Original text: Decide how the default theme is packaged so the installer can publish it to
       `public/theme/default/{css,js,img,fonts}/` (composer package name and layout). Record it in
       `decisions.md`
 - [ ] T051 Extend the mockup with the shell: navbar with the three navigation areas (`main`, `admin`,
       `user`), footer, toast container for the messenger, and the Light/Dark control. Check each page in
       both modes
-- [X] T052 **Done in `webinertia/default-theme#1` (open):** the ACL page, wizard and dashboard widget rules are in `css/theme.css` under the neutral names, with Bootstrap tokens instead of fixed dark-mode colours (the selected wizard grant cards no longer force white text, which was unreadable in light mode). The usermanager `list-col-*` hooks have no rules in the IMS CSS, so none were ported. Original text: Port the CSS the three components need (the `ims-acl-*`, `ims-widget-*`, `ims-badge-*` and
+- [X] T052 **Done, now in `webinertia/webware` (D-021):** the ACL page, wizard and dashboard widget rules, with Bootstrap tokens instead of fixed dark-mode colours, are in the app's `public/theme/default/css/theme.css` (worked out first in `default-theme#1`). The usermanager `list-col-*` hooks have no rules in the IMS CSS, so none were ported. Original text: Port the CSS the three components need (the `ims-acl-*`, `ims-widget-*`, `ims-badge-*` and
       `ims-col-*` rules, 84 in IMS `public/assets/css/custom.css`) into `default-theme/css/` with the
       neutral class names from D-013 and the palette tokens. Keep HTTP-method and privilege colours on
       Bootstrap's semantic colours (D-016); replace hard-coded Bootstrap RGB values with tokens
