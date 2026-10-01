@@ -12,7 +12,7 @@ row and add a dated line; never delete a row.
 | Area | State |
 |---|---|
 | `ThemeResolver`, `ThemeResolverFactory`, `AggregateResolverFactory`, `ConfigProvider` | Built on `prototype/resolver` (commit `d1c05dc`). 7 unit tests, 5 integration tests. Mago `format`, `lint`, `analyze`, `guard` clean. Not merged: there is no PR for this branch yet. |
-| Theme-aware `asset()` helper | Not built. Specified in `spec.md` FR-009 and `tasks.md` Phase 10. |
+| Theme-aware `asset()` helper | Built on `feat/asset-helper` (stacked on `prototype/resolver`, Phase 10 T042–T046, T048; T047 docs open). `ConfigProvider` now has the key constants and registers `AssetFactory` under `view_helpers.factories`. |
 | Asset publishing (installer) | Not built. Requirements live in `webinertia/project-tracking#6` (the Webware component installer RFC). |
 | Default theme visuals | Mockup open as `webinertia/default-theme#1` (CSS tokens plus `mockup/index.html`). |
 | Port of webware-acl, webware-admin, webware-usermanager templates to a neutral `default` theme | Started: usermanager PR #69 open, acl moved on an uncommitted branch. See `tasks.md` Phase 12. |
