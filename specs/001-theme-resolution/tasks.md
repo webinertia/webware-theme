@@ -255,13 +255,16 @@ none lives in a component (standing rule 6).
 - [ ] T065 Specify (in `spec.md`) the theme-management command (D-012, D-020): given a name, copy the
       `default` theme's layout, body and home-page templates and main CSS file into a new theme of that
       name; register a `theme.themes.<name>` map covering only the copied templates; set `theme.active`
-      to it. Also switch the active theme to an existing one. Open: which config file is written
+      to it, written to an **autoloaded config file** (owner, 2026-10-01). Also switch the active theme
+      to an existing one. Choose and record the file's name
 - [ ] T066 Implement the command(s) from T065, following the `Console\` guard rule, once T065 is
       agreed and webware-console placement is recorded (T034). The copy must not overwrite an existing
       theme, and the name is validated as a single path segment (T063)
 - [ ] T067 Tests for T066 to the 100% line and MSI floors
 - [ ] T068 Admin widget to choose the active theme from the installed themes (D-012), using
-      webware-admin's `WidgetInterface`; depends on T065 (installed-theme list and persistence) and
+      webware-admin's `WidgetInterface`. It **only switches** between already installed themes and never
+      creates one (owner, 2026-10-01); the switch must write the same autoloaded file as T065. Depends
+      on T065 (installed-theme list and persistence) and
       belongs in the repository the owner chooses. Not started
 - [X] T069 Done 2026-10-01 for the layout line; the Theme/roots wording is already marked superseded. Update `data-model.md`: replace the `public/component/` layout with the per-theme one (see
       T064) and drop the superseded Theme/roots wording now that D-005 is settled
