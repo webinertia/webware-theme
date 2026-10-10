@@ -19,3 +19,10 @@
 # Ignored from the repo root because `.specify/.gitignore` is managed by
 # `specify` and is overwritten on every integration upgrade.
 /.specify/presets/
+
+# Machine-local extension state. The installed extensions themselves are
+# tracked under `.specify/extensions/`; only the catalog cache and compiled
+# Python bytecode are per-machine.
+/.specify/extensions/.cache/
+__pycache__/
+*.pyc
