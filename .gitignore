@@ -12,3 +12,10 @@
 /.vscode
 /mago-results.txt
 *:Zone.Identifier
+
+# The preset copy is vendored released content: it ships inside
+# `webware/webware-tools/presets/` and is re-installed from there, so tracking
+# it here would duplicate the dependency rather than hold anything we own.
+# Ignored from the repo root because `.specify/.gitignore` is managed by
+# `specify` and is overwritten on every integration upgrade.
+/.specify/presets/
