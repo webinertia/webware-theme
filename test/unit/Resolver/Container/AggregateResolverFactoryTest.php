@@ -26,6 +26,10 @@ use Psr\Container\ContainerInterface;
 use Webware\Theme\Resolver\Container\AggregateResolverFactory;
 use Webware\Theme\Resolver\ThemeResolver;
 
+use function str_replace;
+
+use const DIRECTORY_SEPARATOR;
+
 #[CoversClass(AggregateResolverFactory::class)]
 #[CoversMethod(AggregateResolverFactory::class, '__invoke')]
 final class AggregateResolverFactoryTest extends TestCase
@@ -38,7 +42,11 @@ final class AggregateResolverFactoryTest extends TestCase
         $aggregate = $this->build([], []);
 
         static::assertStringEndsWith(
-            '/themes/default/app/home-page.phtml',
+            str_replace(
+                search : '/',
+                replace: DIRECTORY_SEPARATOR,
+                subject: '/themes/default/app/home-page.phtml',
+            ),
             (string) $aggregate->resolve('app::home-page.phtml'),
         );
     }
