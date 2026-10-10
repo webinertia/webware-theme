@@ -13,7 +13,7 @@ Identity is the directory name. There is no registry and no per-theme metadata f
 | Field | Type | Rules |
 |---|---|---|
 | `name` | `non-empty-string` | A single path segment: no directory separators, no `..`, not empty. It is used as a directory name under `templates/`, so anything else is a path-escape (T002) |
-| `root` | — | **Superseded (D-006):** there is no root field. A theme is a key in `theme.themes` (template overrides) and in `theme.assets` (asset values) |
+| `root` | - | **Superseded (D-006):** there is no root field. A theme is a key in `theme.themes` (template overrides) and in `theme.assets` (asset values) |
 
 `default` is the reserved name: every module that ships templates ships `default`, and it is the fallback
 consulted after the active theme. It cannot collide with mezzio's internal unnamespaced bucket, which is
@@ -21,8 +21,8 @@ the private constant `__DEFAULT__` and unreachable as a template namespace.
 
 ## The layout on disk
 
-Every module — a package, or a module the application ships itself (`App` is just one of them, shipped by
-`webware/webware`) — keeps its templates as `<module>/templates/<theme>/<namespace>/<name>.phtml`, and a
+Every module - a package, or a module the application ships itself (`App` is just one of them, shipped by
+`webware/webware`) - keeps its templates as `<module>/templates/<theme>/<namespace>/<name>.phtml`, and a
 template is addressed `<namespace>::<name>`. The theme is **not** part of the address.
 
 ```
@@ -42,21 +42,21 @@ src/ims-store/templates/              # a module the application ships itself
 ```
 
 A vendor template comes from the vendor module's own `templates/default/<namespace>/` and is overridden by
-any module that places that namespace under its own theme directory — which is how the application
+any module that places that namespace under its own theme directory - which is how the application
 overrides `admin::dashboard.phtml` without touching the package that ships it.
 
 ## Resolution
 
-For a namespace, the resolver assembles the paths that namespace is served from — module by module, and
-within each module the active theme's directory before `default` — and addresses resolve against that.
+For a namespace, the resolver assembles the paths that namespace is served from - module by module, and
+within each module the active theme's directory before `default` - and addresses resolve against that.
 Per-template fallback falls out of the ordering: a template the active theme does not ship resolves from
 `default`, and the framework's own resolvers take anything not theme-owned at all.
 
 Both questions below are **settled** (D-002, D-003). The list is kept so the alternatives stay on record:
 
-- **Module order** for a namespace served by more than one module — presumably the application's own
+- **Module order** for a namespace served by more than one module - presumably the application's own
   module first.
-- **Namespace-keyed paths or theme-keyed maps** — the constructions worth prototyping, since each decides
+- **Namespace-keyed paths or theme-keyed maps**: the constructions worth prototyping, since each decides
   whether the active theme is a build-time or a lookup-time fact:
   - *namespace-keyed paths*: mezzio's own `templates.paths` shape, with the active theme's directory
     prepended per namespace (walked per lookup).
@@ -66,7 +66,7 @@ Both questions below are **settled** (D-002, D-003). The list is kept so the alt
   - *merge-last theme map*: a theme ships its overrides as an address-keyed map and is merged **last**, so
     it wins by the same later-wins rule that makes `templates.map` an override channel today. Every
     address the theme does not list keeps the earlier entry, so per-address fallback is the absence of a
-    key — no fallback logic at all — and the runtime stays a plain `TemplateMapResolver`. Build-time
+    key - no fallback logic at all - and the runtime stays a plain `TemplateMapResolver`. Build-time
     theme.
 
   The key of a map is already the address the renderer asks for, which is why the map is the override
@@ -116,7 +116,7 @@ which is why this shape has none).
 | Output | an absolute path, or `false` so the aggregate continues |
 | Build | the name→path map is built once, at construction |
 | Memoization | resolved names are remembered per instance; nothing above memoizes (`research.md`) |
-| Failure | never throws for an unknown name — throwing would break the aggregate's fallback |
+| Failure | never throws for an unknown name - throwing would break the aggregate's fallback |
 
 ## Theme installer
 
@@ -131,8 +131,8 @@ not hand-write `public/theme/<theme>/…` any more than it hand-writes a lock fi
 
 Still open: how far "manage" goes (create only, update on change, remove on uninstall), and whether the
 installer is a console command in this package or lives in the application. If it is a command here, the
-fleet's console contract applies — registered under `Webware\Console\ConsoleInterface::class` with
-lazy resolution — which makes `webware/webware-console` a dependency of this package, as it is for
+fleet's console contract applies - registered under `Webware\Console\ConsoleInterface::class` with
+lazy resolution - which makes `webware/webware-console` a dependency of this package, as it is for
 `webware/webware-migration`.
 
 ## Asset name

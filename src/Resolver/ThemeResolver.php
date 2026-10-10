@@ -20,8 +20,8 @@ use Override;
 /**
  * Resolves a namespaced template address against the active theme's map.
  *
- * The name handed in is the address the renderer asks for — `app::home-page`, `layout::default`,
- * `admin::dashboard` — and a map is keyed by exactly that, so a hit is an `isset` and nothing
+ * The name handed in is the address the renderer asks for - `app::home-page`, `layout::default`,
+ * `admin::dashboard` - and a map is keyed by exactly that, so a hit is an `isset` and nothing
  * touches the filesystem. An address the active theme does not carry falls back to the `default`
  * theme's entry for the same address, and a name neither theme carries returns `false` so the
  * aggregate resolver continues to the next resolver.

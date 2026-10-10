@@ -19,7 +19,7 @@ default that they can then modify."
 ## Purpose
 
 Webware applications are built to be re-skinned. A design or development shop starts from a Webware
-application, builds a client's site on top of it, and later refreshes that site — often years later —
+application, builds a client's site on top of it, and later refreshes that site - often years later -
 without rewriting the application. This spec defines the mechanism that makes that possible: themes as
 a directory convention, resolved by name, with per-template fallback to the `default` theme every
 package ships.
@@ -62,7 +62,7 @@ pages, verbatim, into an `ims` theme.
 ### User Story 1 - A client redesign ships as a theme, not a fork (Priority: P1)
 
 A shop that built a client's site on Webware is asked to refresh it. They create a theme that
-overrides only what the redesign changes — a layout, a few templates, a stylesheet — and every other
+overrides only what the redesign changes - a layout, a few templates, a stylesheet - and every other
 template continues to come from the packages, unchanged.
 
 **Why this priority:** this is the entire commercial reason the component exists. Without it, a
@@ -78,7 +78,7 @@ renders from the package's `default` theme.
    `templates/acme/layout/default.phtml`, **When** `acme` is the active theme, **Then** the layout
    renders from `acme` and every template `acme` does not ship renders from `default`.
 2. **Given** a theme that ships no `body` template, **When** a page renders, **Then** the body comes
-   from `default` and the page is complete — no error, no empty region.
+   from `default` and the page is complete - no error, no empty region.
 3. **Given** an application with no theme configured, **When** it boots, **Then** the `default` theme
    is used and nothing asks the developer to configure a theme.
 
@@ -115,7 +115,7 @@ call only helpers the Webware packages themselves provide.
 **Why this priority:** it removes an existing defect (a package template calling an application helper
 that does not exist) and proves the convention on a real, non-trivial theme.
 
-**Independent Test:** install the packages without the IMS theme and render a page — no missing-helper
+**Independent Test:** install the packages without the IMS theme and render a page - no missing-helper
 error; then activate `ims` and confirm the IMS shell renders with its own helpers available.
 
 **Acceptance Scenarios:**
@@ -169,9 +169,9 @@ the IMS application renders today.
 
 ### Edge Cases
 
-- The active theme directory does not exist at all — the application still renders from `default`
+- The active theme directory does not exist at all - the application still renders from `default`
   rather than failing.
-- A theme ships a template name that no default provides — the name is simply unknown, and the failure
+- A theme ships a template name that no default provides - the name is simply unknown, and the failure
   is the same failure an unknown template name has always produced.
 - A theme's configured asset name is not present in the resource map. The asset helper throws on an
   unknown name, so asset names are a vocabulary: themes re-value names, they do not invent them.
@@ -179,9 +179,9 @@ the IMS application renders today.
   at the theme that defined the name.
 - A theme name that is not a single path segment (`a/b`, `..`, empty) is rejected before it is used to
   build a path or a URL.
-- The active theme is changed in configuration but the aggregated config is cached — a cached
+- The active theme is changed in configuration but the aggregated config is cached - a cached
   configuration must be cleared for the switch to take effect, and this must be documented.
-- Two components ship the same template name and different themes are active — resolution must be
+- Two components ship the same template name and different themes are active - resolution must be
   deterministic, driven by the configured root order, not by directory scan order.
 
 ## Requirements *(mandatory)*
@@ -196,7 +196,7 @@ agreements, the four Mago gates, and the MSI floors in `webware-ci.json`.
 - **FR-001**: A theme MUST be a directory named for the theme, directly inside the `templates/` directory
   of a module that ships or overrides templates. A module's theme directory holds one subdirectory per
   template namespace.
-- **FR-002**: Templates MUST keep mezzio's namespaced addressing — `<namespace>::<name>`, e.g.
+- **FR-002**: Templates MUST keep mezzio's namespaced addressing - `<namespace>::<name>`, e.g.
   `app::home-page.phtml`, `layout::default`, `admin::dashboard.phtml`. The theme is never part of the
   address; it selects the first directory segment under `templates/`.
 - **FR-003** *(revised 2026-10-01, D-002/D-003)*: Resolution MUST consult the active theme's template
@@ -207,7 +207,7 @@ agreements, the four Mago gates, and the MSI floors in `webware-ci.json`.
   resolves from `default` in the same namespace, and a template no module ships falls through to the
   framework's own resolvers.
 - **FR-004a**: Any module MUST be able to override another module's template by placing that namespace
-  under its own theme directory — this is how an application overrides a vendor template without
+  under its own theme directory - this is how an application overrides a vendor template without
   touching the package that ships it.
 - **FR-005**: Resolution MUST NOT add a filesystem walk per lookup. Map lookups are the expected
   mechanism; any scan performed to build a map MUST happen once.
@@ -231,7 +231,7 @@ agreements, the four Mago gates, and the MSI floors in `webware-ci.json`.
   MUST be a theme-resolvable template name (`body`, `layout`) rather than a path the owning package
   publishes as a map entry. This is what lets a theme point at a body template at all, so the collapse of
   webware-htmx's five-key lookup (`templates.layout`, `templates.body`, `templates.default_layout`,
-  `templates.default_body`, `view_manager.default_layout`) is a **prerequisite of this feature** — it is
+  `templates.default_body`, `view_manager.default_layout`) is a **prerequisite of this feature**: it is
   the one part of webinertia/webware-htmx#21 that is required here. The package reads the name and hands
   it to whatever resolver is registered in the aggregate; it does not depend on this package to do so.
 - **FR-013**: The shipped `default` theme MUST call only helpers that the package's own dependencies
@@ -247,7 +247,7 @@ agreements, the four Mago gates, and the MSI floors in `webware-ci.json`.
   development, copies in production, is idempotent, and removes what a package no longer ships. The
   installer's own requirements are tracked in `webinertia/project-tracking#6` (D-012). Installing is the
   composer plugin installer's job; creating, registering and switching themes is a command, and choosing
-  one is an admin widget (D-012, tasks T065–T068).
+  one is an admin widget (D-012, tasks T065 - T068).
 - **FR-016**: The shipped `default` theme MUST use stock Bootstrap 5.3 markup and spacing, be dark by
   default with a Light/Dark control that persists the choice, and need no build step (D-015).
 - **FR-017**: The two colours of the webinertia logo MUST be the theme's `primary` (`#7e5ae0`) and
@@ -282,7 +282,7 @@ agreements, the four Mago gates, and the MSI floors in `webware-ci.json`.
   scan relative to resolving one it does ship.
 - **SC-003**: A package's templates render in a consuming application with zero theme configuration
   present.
-- **SC-004**: Switching the active theme is a configuration change plus a config-cache clear — no code
+- **SC-004**: Switching the active theme is a configuration change plus a config-cache clear - no code
   change, no file move.
 - **SC-005**: Extracting the IMS shell into the `ims` theme leaves the rendered markup identical.
 - **SC-006**: Installing the packages without any application code renders a page without a
