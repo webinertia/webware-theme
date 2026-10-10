@@ -9,7 +9,7 @@
 # This compose file is the single source of truth for the environment. Two
 # ways to use it:
 #
-#   1. VS Code Dev Container — "Reopen in Container" uses
+#   1. VS Code Dev Container: "Reopen in Container" uses
 #      .devcontainer/devcontainer.json, which is *backed by* this file (it
 #      references the `tooling` service rather than defining its own).
 #
@@ -24,7 +24,7 @@
 # Packages whose tests need MySQL uncomment the `mysql` service below (and the
 # `phpmyadmin` web UI if wanted), plus the `depends_on` block on `tooling`. The
 # `mysql` service mirrors the `db_image` package parameter used by CI, and is
-# reachable from `tooling` as host `mysql` on port 3306 — matching the PhpDb
+# reachable from `tooling` as host `mysql` on port 3306: matching the PhpDb
 # `mysql.local.php` connection convention. Packages that need a different
 # engine add an equivalent service here (postgres, mariadb, ...) mirroring
 # their own `db-image` parameter.
@@ -56,13 +56,13 @@ services:
       - "host.docker.internal:host-gateway"
     volumes:
       # Bind-mount the source so edits are visible on both the host and the
-      # container. vendor/ is NOT overridden — it is the host's own copy.
+      # container. vendor/ is NOT overridden - it is the host's own copy.
       # Composer/installs inside the container write straight into the
       # developer's working tree on disk.
       - .:/app
       # The Composer cache lives in a named volume (Linux-native I/O, fast on
       # Windows) so downloads survive container rebuilds. It is only a cache
-      # — the developer's real artifacts all live on the host.
+      # - the developer's real artifacts all live on the host.
       - composer-cache:/tmp/composer-cache
     # Uncomment when the package's tests need MySQL (see the `mysql` service
     # below). Ensures the database is ready before the shell attaches.
@@ -72,7 +72,7 @@ services:
     working_dir: /app
 
   # -------------------------------------------------------------------------
-  # MySQL (optional) — uncomment this whole block for packages whose tests
+  # MySQL (optional) - uncomment this whole block for packages whose tests
   # need a MySQL database (e.g. webware-acl via php-db/phpdb-mysql).
   #
   # Mirror the spec's `db_image` / `db_env_json` / `db_port` Package Parameters
@@ -81,7 +81,7 @@ services:
   # credentials below. Adjust MYSQL_DATABASE / MYSQL_USER / MYSQL_PASSWORD to
   # the package's test-database convention. MYSQL_ALLOW_EMPTY_PASSWORD keeps
   # the test-only database free of a root password and in sync with the CI
-  # `db_env_json` — remove it if the package pins a root password instead.
+  # `db_env_json` - remove it if the package pins a root password instead.
   # -------------------------------------------------------------------------
   # mysql:
   #   image: mysql:9.7
@@ -101,7 +101,7 @@ services:
   #     # survives `docker compose down` (use `down -v` to wipe it).
   #     - mysql-data:/var/lib/mysql
   #
-  # # phpMyAdmin — optional web UI for the `mysql` service above. Reachable at
+  # # phpMyAdmin - optional web UI for the `mysql` service above. Reachable at
   # # http://localhost:8080 (log in as root with an empty password, or with
   # # the MYSQL_USER / MYSQL_PASSWORD credentials). Uncomment alongside
   # # `mysql`.

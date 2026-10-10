@@ -23,14 +23,14 @@ public/theme/acme/                    # this theme's assets, where they can be s
 
 Addresses stay mezzio's namespaced ones (`<namespace>::<name>`); the theme selects the first directory
 segment and is never part of the address. Templates and assets live in different places because they are
-served differently — `templates/` is never a served location, so nothing under it can be requested by a
+served differently - `templates/` is never a served location, so nothing under it can be requested by a
 browser.
 
 1. Put the theme's templates in a directory of your choosing (the layout above is the convention) and
    list each address the theme overrides in `theme.themes.<name>`. Anything not listed continues to
    come from `default`, address by address.
 2. Its assets go under `public/theme/<theme>/{css,js,img,fonts}/`, and their **names** are pointed at
-   them in `theme.assets.<theme>` (planned, T042; the asset helper does not read it yet) — the names
+   them in `theme.assets.<theme>` (planned, T042; the asset helper does not read it yet) - the names
    are the ones the components already use; you are changing values, not inventing names.
 3. Activate it:
 
@@ -49,7 +49,7 @@ return [
 ];
 ```
 
-4. Clear the aggregated config cache — the active theme is read from configuration, and a cached
+4. Clear the aggregated config cache - the active theme is read from configuration, and a cached
    configuration will keep serving the previous theme.
 
 ## For a package author
@@ -65,10 +65,10 @@ your-package/
     └── layout/default.phtml                     -> layout::default
 ```
 
-Address templates the way mezzio does — `<namespace>::<name>`, where the namespace is one you choose
+Address templates the way mezzio does - `<namespace>::<name>`, where the namespace is one you choose
 (`your-namespace`, or a shared one such as `layout`). An application that installs the package gets a
 working interface with no theme configuration; if you want to ship an alternate theme, add
-`templates/<name>/<namespace>/` beside `default` — same convention, no registration.
+`templates/<name>/<namespace>/` beside `default` - same convention, no registration.
 
 Rules that keep this working across packages:
 

@@ -26,7 +26,7 @@ configuration. No middleware, no build step, no database.
 
 One consumer change is a **prerequisite**, because a resolver can only resolve a name it is given: the
 package that layers the body and layout (webware-htmx) must name each with one configuration value
-(Phase 6, T039–T041 of `tasks.md`, and the required subset of webinertia/webware-htmx#21; the work is
+(Phase 6, T039 - T041 of `tasks.md`, and the required subset of webinertia/webware-htmx#21; the work is
 PR `webinertia/webware-htmx#22`). Everything else
 in that RFC is enabled by this feature's convention but not required by it.
 
@@ -36,7 +36,7 @@ in that RFC is enabled by this feature's convention but not required by it.
 - **Runtime deps**: `laminas/laminas-view ^3.0`, `psr/container ^2.0`. `mezzio/mezzio-laminasviewrenderer`
   and `webware/webware-htmx` stay consumers, not dependencies.
 - **Console (conditional)**: if the installer turns out to be a command in this package (T034),
-  `webware/webware-console` becomes a dependency — as it is for webware-migration — and the guard rule for
+  `webware/webware-console` becomes a dependency - as it is for webware-migration - and the guard rule for
   `Console\` applies: a `final` class named `*Command` carrying
   `#[Symfony\Component\Console\Attribute\AsCommand]`, directly in `Console\`, with its factory in
   `Console\Container\`.
@@ -56,10 +56,10 @@ All measured in `webinertia/webware` against the installed `laminas/laminas-view
 
 | Fact | Source | Consequence |
 |---|---|---|
-| `TemplateMapResolver::resolve()` is `$this->map[$name] ?? false` — no filesystem call | `laminas-view/src/Resolver/TemplateMapResolver.php` | Map lookup is the resolution mechanism; a theme contributes entries, not paths |
+| `TemplateMapResolver::resolve()` is `$this->map[$name] ?? false` - no filesystem call | `laminas-view/src/Resolver/TemplateMapResolver.php` | Map lookup is the resolution mechanism; a theme contributes entries, not paths |
 | `TemplatePathStack::resolve()` → `resolveToPath()` creates an `SplFileInfo` and calls `isReadable()` per path, on hits and misses | `laminas-view/src/Resolver/TemplatePathStack.php` | Path stacking is the cost the resolver exists to remove (FR-005) |
 | `NamespacedPathStackResolver::resolve()` lazily builds one `TemplatePathStack` per namespace | `mezzio-laminasviewrenderer/src/NamespacedPathStackResolver.php` | One `namespace::name` per theme is one stat list per theme |
-| `AggregateResolver::resolve()` `continue`s on `false`, returns the first hit | `laminas-view/src/Resolver/AggregateResolver.php` | Per-template fallback is free between resolvers — the hook the design uses |
+| `AggregateResolver::resolve()` `continue`s on `false`, returns the first hit | `laminas-view/src/Resolver/AggregateResolver.php` | Per-template fallback is free between resolvers - the hook the design uses |
 | No `ResolveCache` anywhere in `laminas-view` 3.x `src` | grep, 2026-09-29 | Nothing memoizes resolution; the resolver memoizes its own results |
 | `ConfigAggregator::mergeArray()`: `is_int($key)` appends; string keys replace and recurse | `laminas-config-aggregator/src/ConfigAggregator.php` | Maps are the override channel (later wins); path lists give the first-registered provider priority |
 | `Laminas\View\Helper\Asset::__invoke()` throws on an unknown name; the class is `final readonly` and is built once by `AssetFactory` from `view_helper_config.asset.resource_map` (not `view_manager.asset`, as earlier drafts said) | `laminas-view/src/Helper/Asset.php`, `Helper/Service/AssetFactory.php`; re-measured 2026-10-01 | Asset names are a fixed vocabulary (FR-009). Theme awareness is a factory override that builds a merged map (D-008), not a subclass |
@@ -71,7 +71,7 @@ All measured in `webinertia/webware` against the installed `laminas/laminas-view
 
 ## Constitution Check
 
-No constitution is ratified in this repository — `.specify/memory/constitution.md` is the untouched
+No constitution is ratified in this repository - `.specify/memory/constitution.md` is the untouched
 init template (`[PROJECT_NAME]`, `[PRINCIPLE_1_NAME]`, … placeholders intact). There are therefore no
 project principles to gate this plan against. The gates that do apply, and that any implementation
 must pass: the fleet agent working agreements, the four Mago gates, MSI 95/95 from `webware-ci.json`,
@@ -124,7 +124,7 @@ test/
 ```
 
 The implementation is deliberately smaller than the doc set: a contract, a resolver, an installer and
-wiring. There is no renderer subclass — `webware-htmx` keeps `View\LaminasRenderer` for body/layout
+wiring. There is no renderer subclass - `webware-htmx` keeps `View\LaminasRenderer` for body/layout
 layering, and this package only answers "which file is this template name?" and "what does a theme's
 installed asset set look like?".
 

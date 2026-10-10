@@ -12,7 +12,7 @@ re-derived rather than taken on faith. Measurements were taken against the insta
 mezzio addresses templates as `<namespace>::<name>`, and `NamespacedPathStackResolver` already owns one
 `TemplatePathStack` per namespace. This feature builds on that rather than replacing it: the theme becomes
 the **first directory segment** under a module's `templates/`, and the work is assembling, per namespace,
-the paths that namespace is served from — the active theme's directory before `default` — so that "the
+the paths that namespace is served from - the active theme's directory before `default` - so that "the
 theme does not ship this template" resolves from `default` with no special case anywhere.
 
 Earlier iterations instead pushed extra paths onto the resolver stack globally and modified the renderer to
@@ -25,7 +25,7 @@ The earlier iterations of this component modified the renderer and pushed additi
 resolver stack. It worked, and it is discarded for cost reasons:
 
 - `TemplatePathStack::resolve()` → `resolveToPath()` loops its paths doing `new SplFileInfo($path . $name)`
-  and `isReadable()` — one stat per path, in order, **on a hit and on a miss**.
+  and `isReadable()` - one stat per path, in order, **on a hit and on a miss**.
 - `NamespacedPathStackResolver::resolve()` lazily constructs a `TemplatePathStack` **per namespace** and
   delegates. So each theme-as-namespace is its own stat list, and a template the active theme lacks
   walks the whole theme stack before the default stack is even consulted.
@@ -38,21 +38,21 @@ for you, so whatever a resolver touches at resolve time, it pays per lookup.
 ## Why a resolver, and why maps
 
 - `AggregateResolver::resolve()` iterates its priority queue, `continue`s when a resolver returns
-  `false`, and returns the first hit. Per-template fallback is therefore **free between resolvers** —
+  `false`, and returns the first hit. Per-template fallback is therefore **free between resolvers**:
   this is the hook the design uses.
-- `TemplateMapResolver::resolve()` is `return $this->map[$name] ?? false;` — **no filesystem call at
+- `TemplateMapResolver::resolve()` is `return $this->map[$name] ?? false;` - **no filesystem call at
   all**. Map entries are the cheap layer.
 - Therefore the resolver contributes and consults **maps**, and the only path stack in play is the one
   the framework already has.
 
 Consequence recorded as FR-005: resolution must not add a filesystem walk per lookup.
 
-## Configuration precedence — measured, and counter-intuitive
+## Configuration precedence: measured, and counter-intuitive
 
 `ConfigAggregator::mergeConfig()` → `mergeArray()` (the same logic as `Laminas\Stdlib\ArrayUtils::merge`):
 
 - `is_int($key)` → `$a[] = $value`: integer keys **append**. A list from a later provider lands *after*
-  the earlier one, so for `templates.paths` — walked in list order — the **first-registered path wins a
+  the earlier one, so for `templates.paths` - walked in list order - the **first-registered path wins a
   same-named file**, i.e. packages would shadow a theme.
 - string keys → `$a[$key] = $value`, recursing into string-keyed sub-arrays: **later wins**. This is how
   an application's `templates.map['body::default']` override works today, and why maps are the override
@@ -84,19 +84,19 @@ for paths that are not files).
 
 ## The webware-htmx body/layout layer
 
-`LaminasRendererFactory` still reads **five** keys for one idea — `templates.layout`, `templates.body`,
-`templates.default_layout`, `templates.default_body`, `view_manager.default_layout` — where the first
+`LaminasRendererFactory` still reads **five** keys for one idea - `templates.layout`, `templates.body`,
+`templates.default_layout`, `templates.default_body`, `view_manager.default_layout` - where the first
 non-empty becomes the layout and the **last** non-empty becomes the body, i.e. two precedence rules over
 one list. FR-012 collapses this to theme-resolved names.
 
 Related measurement: `webware-htmx/templates/body/default.phtml` is the IMS application shell (Farmers
 IMS branding, store list, Bootstrap navbar, `$this->navigation('main'|'admin'|'user')`) and calls
-`$this->imsMessenger()`. That helper is **defined nowhere** — not in the application repository outside
+`$this->imsMessenger()`. That helper is **defined nowhere**: not in the application repository outside
 `vendor`, and not in `webware/vendor` at all; the application's own copy of the file has the call
 commented out. A package shipping a default template cannot call a helper nothing provides, so the shell
 becomes the `ims` theme and the package ships a helper-clean `default` (US3).
 
-## LCDD — no build step
+## LCDD: no build step
 
 "Least Common Denominator Development": the default is htmx plus plain CSS plus the latest Bootstrap CSS,
 with Tailwind bridges later via asset helpers. Consequences that shaped the design:

@@ -14,7 +14,7 @@ Notes that apply to every task: `mago fmt` before any commit; all four gates cle
 `#[CoversMethod]` with the matching imports (`requireCoverageMetadata="true`); MSI gates are 95/95 from
 `webware-ci.json` and are not a per-task parameter.
 
-## Phase 1 — Theme contract
+## Phase 1: Theme contract
 
 - [X] T001 **Dropped (D-005).** No `ThemeInterface`; config key constants instead (T062). Original text: define `ThemeInterface` in `src/ThemeInterface.php`: the name, the root it resolves from,
       and nothing else. A theme is a directory; identity is its name (`@api`, since consumers
@@ -25,13 +25,13 @@ Notes that apply to every task: `mago fmt` before any commit; all four gates cle
 - [X] T003 **Superseded (D-006, D-003).** Define the theme root contract: how a package declares `templates/<theme>` as a root, as a
       docblock `@type` alias in `ConfigProvider` in the house style (`@type`, not `@phpstan-type`)
 
-## Phase 2 — Resolver
+## Phase 2: Resolver
 
 - [X] T004 **Built** (`ThemeResolver`, 7 unit tests). Implement `Resolver\ThemeResolver` in `src/Resolver/ThemeResolver.php`, implementing
-      `Laminas\View\Resolver\ResolverInterface`. It MUST return `false` — never throw — for a name it
+      `Laminas\View\Resolver\ResolverInterface`. It MUST return `false` - never throw - for a name it
       cannot resolve, so `AggregateResolver` continues to the next resolver
-- [X] T005 **Superseded (D-002, D-003).** Build, per namespace, the paths that namespace is served from — module by module, and within
-      each module the active theme's directory before `default` — so fallback is per template and not per
+- [X] T005 **Superseded (D-002, D-003).** Build, per namespace, the paths that namespace is served from - module by module, and within
+      each module the active theme's directory before `default` - so fallback is per template and not per
       theme (FR-004)
 - [X] T006 **Done by D-002:** the maps are config arrays, the lookup is an array access, nothing to memoize. Resolve from a map built once, not by walking directories per lookup (FR-005): build the
       map when the resolver is constructed, and memoize resolved names in the instance
@@ -43,7 +43,7 @@ Notes that apply to every task: `mago fmt` before any commit; all four gates cle
 - [X] T009 **Built** (`ThemeResolverFactory`, `AggregateResolverFactory`: theme 100, map 50, path stack 1). Register the resolver in `src/Resolver/Container/ThemeResolverFactory.php` and wire it to
       the aggregate ahead of the map/path resolvers, so an active theme wins over package defaults
 
-## Phase 2b — Prototype the construction before committing to it
+## Phase 2b: Prototype the construction before committing to it
 
 Next free IDs, following the convention above. Both shapes hang off two measured facts: a map's key is the
 address the renderer asks for (`app::home-page`), and the resolver gets a factory, so the active theme can
@@ -58,18 +58,18 @@ be injected from configuration.
       becomes a lookup-time fact, and measure what building the maps costs (directory scan or manifest)
 - [ ] T037 **Not run** (D-002). Prototype **merge-last theme map**: a theme ships its overrides as an address-keyed map, and a
       provider or post-processor registered last merges it over the rest, so the theme wins by the same
-      rule that makes `templates.map` an override channel today — and every address the theme does not
+      rule that makes `templates.map` an override channel today - and every address the theme does not
       list keeps its earlier entry, which is per-address fallback for free. Runtime stays a plain
       `TemplateMapResolver`: no custom resolver, no stats. Confirm what the rebuild costs at config time
       and whether the config cache absorbs it
 - [X] T038 **Recorded in `decisions.md` D-002.** Write down which won and why (build-time theme vs lookup-time theme is the real fork), then
       fold it into the resolver tasks above rather than leaving two constructions in the code
 
-## Phase 3 — Configuration
+## Phase 3: Configuration
 
 - [X] T010 **Built** (`@type ThemeConfig`: `active`, `themes`; the `roots` list is gone, D-006). Define the configuration shape (active theme + roots + per-component roots) as a docblock
       `@type` alias, with `ConfigProvider` publishing the package's own defaults
-- [X] T011 **Built.** Read configuration only — no container bootstrapping at render time, no database access,
+- [X] T011 **Built.** Read configuration only - no container bootstrapping at render time, no database access,
       at boot or at render (FR-006)
 - [X] T012 **Built** (`theme.active` absent or empty means `default`; test `defaultsToTheDefaultThemeWhenNoneIsConfigured`). Select the active theme from configuration alone (FR-008) and default to `default` when
       nothing is configured, so an application with no theme configuration renders (US1 scenario 3)
@@ -79,35 +79,35 @@ be injected from configuration.
       taking the namespace root's sibling `templates/` directory; skip `autoload-dev` prefixes and
       handle a prefix that maps to more than one directory (FR-011)
 
-## Phase 4 — Asset names
+## Phase 4: Asset names
 
-- [X] T015 **Superseded by Phase 10 (T042–T048), D-007…D-009.** Define the resource-map contribution: the package and every component publish
+- [X] T015 **Superseded by Phase 10 (T042 - T048), D-007…D-009.** Define the resource-map contribution: the package and every component publish
       `view_helper_config.asset.resource_map` entries; a theme re-values names and never introduces them
       (FR-009, and the `Asset` helper throws on an unknown name). Settle the exact asset path shape and
-      filenames under `public/theme/<theme>/` while doing so — assets are served from there, never from
+      filenames under `public/theme/<theme>/` while doing so - assets are served from there, never from
       a theme's `templates/` root
-- [X] T016 **Superseded by Phase 10 (T042–T048).** Contribute the default theme's entries from `ConfigProvider` so that an application with no
+- [X] T016 **Superseded by Phase 10 (T042 - T048).** Contribute the default theme's entries from `ConfigProvider` so that an application with no
       theme configuration resolves every asset name the shipped templates use
 
-## Phase 4b — Theme installer (FR-015)
+## Phase 4b: Theme installer (FR-015)
 
 Task IDs are assigned in the order they were added, so this phase carries the next free numbers rather
 than displacing the ones below it.
 
 - [ ] T032 **Re-scoped (D-012): installing belongs to the composer plugin installer** (`project-tracking#6`), not this package. Original text: implement the theme installer: given a theme, materialise its assets under
-      `public/theme/<theme>/` from the theme's own source. Nothing here is a build step — it is the one
+      `public/theme/<theme>/` from the theme's own source. Nothing here is a build step - it is the one
       place that writes into a served location
 - [ ] T033 **Open; requirements are now in `project-tracking#6`** (symlink in dev, copy in prod, idempotent, removes what a package stopped shipping). Decide and record how far "manage" goes: create only, update when the theme's assets change,
       and what happens on uninstall. Whichever way it goes, the installer owns it rather than leaving
       stale files in `public/`
-- [ ] T034 **Re-scoped (D-012).** The *installer* is the composer plugin. The console command is for creating a theme from `default`, registering it and switching the active theme (T065–T067). Whether that command lives in this package (registered under
+- [ ] T034 **Re-scoped (D-012).** The *installer* is the composer plugin. The console command is for creating a theme from `default`, registering it and switching the active theme (T065 - T067). Whether that command lives in this package (registered under
       `Webware\Console\ConsoleInterface::class`, which makes `webware/webware-console` a dependency, as
       it is for webware-migration) or elsewhere is still to record in `plan.md`. Original text: decide whether the installer is a console command in this package (registered under
 
-## Phase 5 — The convention in the packages
+## Phase 5: The convention in the packages
 
 - [ ] T017 Define the layout convention and write it into the package README:
-      `<module>/templates/<theme>/<namespace>/<name>.phtml`, addressed as `<namespace>::<name>` — a theme
+      `<module>/templates/<theme>/<namespace>/<name>.phtml`, addressed as `<namespace>::<name>` - a theme
       is a directory of namespace directories, and it is never part of the address
 - [ ] T018 Confirm the convention against a package with existing templates (webware-navigation,
       webware-htmx) and record any divergence rather than moving files in a package outside this
@@ -115,7 +115,7 @@ than displacing the ones below it.
 - [X] T019 **Resolved by design (D-002, D-006):** maps are config, so precedence is the config merge (later wins), not a module order. Settle the cross-module question the convention leaves open: when more than one module serves
       the same namespace, which module's path is consulted first (record it in `plan.md`)
 
-## Phase 6 — The htmx configuration prerequisite (FR-012)
+## Phase 6: The htmx configuration prerequisite (FR-012)
 
 - [X] T039 **Done: `webinertia/webware-htmx#22` merged and `1.0.0-alpha.1` tagged by the owner on 2026-10-01.** Original text (merge state was `UNKNOWN`, re-check): Make webware-htmx read **one key per value** for the body and the layout, whose values are
       theme-resolvable template names, replacing the five-key lookup and the package-published
@@ -127,7 +127,7 @@ than displacing the ones below it.
 - [ ] T041 **Open.** Keep webware-htmx free of a dependency on this package: it reads the configured name and hands
       it to the aggregate resolver, whichever package supplies it
 
-## Phase 7 — Consumer-side work, deliberately not in this list
+## Phase 7: Consumer-side work, deliberately not in this list
 
 Everything else in webinertia/webware-htmx#21 is work the convention *enables* but does not depend on:
 
@@ -138,9 +138,9 @@ Everything else in webinertia/webware-htmx#21 is work the convention *enables* b
 - Renderer packaging, the `TemplateRendererInterface` alias, and how a team on another client-scripting
   approach is served
 
-## Phase 8 — Tests
+## Phase 8: Tests
 
-- [ ] T022 **Partly met:** theme hit, per-address fallback and unknown-returns-`false` are tested; name validation (separators) is not, and belongs to T043. Unit: `test/unit/Resolver/ThemeResolverTest.php` — a theme hit, a per-template fallback to
+- [ ] T022 **Partly met:** theme hit, per-address fallback and unknown-returns-`false` are tested; name validation (separators) is not, and belongs to T043. Unit: `test/unit/Resolver/ThemeResolverTest.php` - a theme hit, a per-template fallback to
       `default`, an unknown name returning `false`, and name validation rejecting separators
 - [ ] T023 **Superseded in intent by D-002** (there is no per-namespace ordering to test); re-scope to "two themes each carry the same address" if a test is wanted. Unit: the per-namespace ordering, including the case where two modules serve the same
       namespace and ship the same template name
@@ -149,7 +149,7 @@ Everything else in webinertia/webware-htmx#21 is work the convention *enables* b
 - [X] T025 **Built** (`ConfigProviderWiringTest`, green). Keep `test/integration/ConfigProviderWiringTest.php` green: it asserts
       `extra.laminas.config-provider` agrees with the namespace
 
-## Phase 9 — Spec-kit tracking
+## Phase 9: Spec-kit tracking
 
 - [X] T026 **Done** (specs and `.specify` are tracked on this branch). Keep `.specify/` and `/specs/` tracked in this repository (deliberate divergence from the
       preset's alignment tasks, which add both to `.gitignore`): this component's development is
@@ -157,7 +157,7 @@ Everything else in webinertia/webware-htmx#21 is work the convention *enables* b
 - [X] T027 **Done** (`.specify/.gitignore` ignores `presets/`). Keep the vendored preset copy (`.specify/presets/`) local via `.specify/.gitignore`; it is
       released content shipped in `webware/webware-tools/presets/`
 
-## Phase 10 — Theme-aware asset helper (FR-009, FR-009a; D-007, D-008, D-009)
+## Phase 10: Theme-aware asset helper (FR-009, FR-009a; D-007, D-008, D-009)
 
 Why: laminas-view's `Asset` helper is `final readonly` and is built once from
 `view_helper_config.asset.resource_map`, with no idea of a theme. The fix is a factory, not a subclass.
@@ -188,7 +188,7 @@ Why: laminas-view's `Asset` helper is `final readonly` and is built once from
 - [X] T048 **Done earlier** (`data-model.md`, `research.md` carry `view_helper_config.asset.resource_map`). Record the final key paths in `data-model.md` and `research.md` (they currently describe
       `view_manager.asset.resource_map`, which is wrong, D-009)
 
-## Phase 11 — The default theme's assets (repository `webinertia/default-theme`; D-015, D-016)
+## Phase 11: The default theme's assets (repository `webinertia/default-theme`; D-015, D-016)
 
 - [X] T049 **Superseded (D-021).** `webinertia/default-theme` is a scratch space, not a deliverable; its PR is not to be merged as a package. Original text: Land `webinertia/default-theme#1` (the Bootstrap 5.3.8 token overrides in `css/theme.css` and
       `mockup/index.html`). Owner review; do not merge without them
@@ -205,7 +205,7 @@ Why: laminas-view's `Asset` helper is `final readonly` and is built once from
 - [ ] T053 CMS-style landing page layout mockup for `app::home-page` (hero plus regions). Blocked on the
       contract location, D-018
 
-## Phase 12 — Port the base templates to a neutral `default` theme (FR-018 to FR-020; D-010, D-013, D-014)
+## Phase 12: Port the base templates to a neutral `default` theme (FR-018 to FR-020; D-010, D-013, D-014)
 
 Scope: webware-acl, webware-admin, webware-usermanager. Everything IMS-specific is copied **verbatim**
 into the `ims` theme first; the `default` copy then loses the `ims-` coupling. No IMS code is lost and
@@ -233,7 +233,7 @@ none lives in a component (standing rule 6).
       resources, the user list and the dashboard render with the palette, and the ACL search, filters,
       rules offcanvas and protect-route wizard work. Needs an admin user in the app database
 
-## Phase 13 — Cross-repository dependencies
+## Phase 13: Cross-repository dependencies
 
 - [ ] T060 `project-tracking#6` (the installer RFC) carries the asset-publishing requirements (added
       2026-10-01). Until an installer exists, publish assets with a documented one-off command and remove
@@ -241,14 +241,14 @@ none lives in a component (standing rule 6).
 - [ ] T061 Decide where the home-page block contract lives (D-018), then write its spec and plan in that
       repository. This feature only needs the `default` theme templates that render it (D-019)
 
-## Phase 14 — Owner decisions of 2026-10-01 (D-005, D-011, D-012)
+## Phase 14: Owner decisions of 2026-10-01 (D-005, D-011, D-012)
 
 - [X] T062 **Done:** `ConfigProvider::THEME`, `ACTIVE`, `THEMES`, `ASSETS`, used by both factories. Add constants for the known config keys in `ConfigProvider` (`THEME = 'theme'`, `ACTIVE`,
       `THEMES`, `ASSETS`) and use them in `ThemeResolverFactory` and the tests instead of the string
       literals (D-005). No new classes
 - [X] T063 **Done** in `AssetFactory` (the one place a name becomes a path today); the command (T066) must reuse the same rule. Validate a theme name as a single path segment (no separators, no `..`) at the one place it
       becomes a path, the asset factory (T043); test it. Do not add a value object (D-005)
-- [ ] T064 Component assets are per theme (D-011): in T042–T043 the asset values for a component live
+- [ ] T064 Component assets are per theme (D-011): in T042 - T043 the asset values for a component live
       under `theme.assets.<theme>` and resolve to `/theme/<theme>/component/<component>/…`; document the
       layout in `data-model.md` (it currently shows the superseded `public/component/` path) and
       `quickstart.md`
@@ -272,10 +272,10 @@ none lives in a component (standing rule 6).
 
 ## Verification
 
-- [ ] T028 `mago format --check && mago lint && mago analyze && mago guard` — all four clean
+- [ ] T028 `mago format --check && mago lint && mago analyze && mago guard` - all four clean
 - [ ] T029 `composer test`, `composer test-integration`, `composer test-coverage`,
-      `composer mutation-test` — 100% line coverage, MSI at or above 95
+      `composer mutation-test` - 100% line coverage, MSI at or above 95
 - [ ] T030 Render a page in an application with the packages installed and no theme configured (SC-003,
       SC-006), then activate a theme that overrides one layout and confirm everything else falls back
-- [ ] T031 Push the branch, open the PR, and confirm the required workflow's checks are green —
+- [ ] T031 Push the branch, open the PR, and confirm the required workflow's checks are green -
       which requires `ci-target` to be set on the repository first
