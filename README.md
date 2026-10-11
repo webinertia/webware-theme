@@ -7,7 +7,7 @@ single array read, with no filesystem walk.
 [![PHP Version](https://img.shields.io/packagist/php-v/webware/webware-theme)](https://packagist.org/packages/webware/webware-theme)
 [![Latest Version](https://img.shields.io/packagist/v/webware/webware-theme)](https://packagist.org/packages/webware/webware-theme)
 [![License](https://img.shields.io/github/license/webinertia/webware-theme)](LICENSE)
-[![Required CI](https://github.com/webinertia/webware-theme/actions/workflows/required/webinertia/.github/.github/workflows/continuous-integration.yml/badge.svg)](https://github.com/webinertia/webware-theme/actions/workflows/required/webinertia/.github/.github/workflows/continuous-integration.yml)
+[![Continuous Integration](https://github.com/webinertia/webware-theme/actions/workflows/required/webinertia/.github/.github/workflows/continuous-integration.yml/badge.svg)](https://github.com/webinertia/webware-theme/actions/workflows/required/webinertia/.github/.github/workflows/continuous-integration.yml)
 [![codecov](https://codecov.io/gh/webinertia/webware-theme/graph/badge.svg)](https://codecov.io/gh/webinertia/webware-theme)
 [![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fwebinertia%2Fwebware-theme%2F1.0.x)](https://dashboard.stryker-mutator.io/reports/github.com/webinertia/webware-theme/1.0.x)
 
