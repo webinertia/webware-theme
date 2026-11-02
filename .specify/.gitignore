@@ -8,7 +8,7 @@ feature.json
 # Per-machine extension config overrides.
 extensions/*/local-config.yml
 
-# The preset copy is vendored released content: it ships inside
-# `webware/webware-tools/presets/` and is re-installed from there, so tracking it
-# here would duplicate the dependency rather than hold anything we own.
-presets/
+# Executable adapter packages and their per-checkout provenance registry.
+# Execution consent is stored separately in the user's local trust registry.
+integrations/packages/
+integrations/packages.json
