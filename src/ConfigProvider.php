@@ -14,8 +14,11 @@ declare(strict_types=1);
 
 namespace Webware\Theme;
 
+use Laminas\View\ConfigProvider as LaminasViewConfigProvider;
 use Laminas\View\Helper\Asset;
 use Laminas\View\Resolver\AggregateResolver;
+use Mezzio\LaminasView\ConfigProvider as MezzioLaminasViewConfigProvider;
+use Webware\ConfigManager\Attribute\LoadAfter;
 use Webware\Theme\Resolver\Container\AggregateResolverFactory;
 use Webware\Theme\Resolver\Container\ThemeResolverFactory;
 use Webware\Theme\Resolver\ThemeResolver;
@@ -27,9 +30,11 @@ use Webware\Theme\View\Helper\Container\AssetFactory;
  * Declared under `extra.laminas.config-provider` in composer.json, so a consumer's config aggregator
  * merges this without any further registration.
  *
- * Merge this provider **after** `Mezzio\LaminasView\ConfigProvider`: both own
- * `AggregateResolver::class`, the later provider wins, and the theme being consulted first is the
- * whole point of the package.
+ * Merge this provider **after** `Laminas\View\ConfigProvider` and
+ * `Mezzio\LaminasView\ConfigProvider`: all three own `AggregateResolver::class`, the later provider
+ * wins, and the theme being consulted first is the whole point of the package. The requirement is
+ * declared with {@see LoadAfter} rather than left to the order of a consumer's provider list, which
+ * `laminas-component-installer` prepends as packages are installed.
  *
  * @type ThemeConfig array{
  *     active?: non-empty-string,
@@ -45,6 +50,7 @@ use Webware\Theme\View\Helper\Container\AssetFactory;
  * }
  * @internal
  */
+#[LoadAfter(LaminasViewConfigProvider::class, MezzioLaminasViewConfigProvider::class)]
 final class ConfigProvider
 {
     /** The top-level configuration key every theme setting sits under. */
