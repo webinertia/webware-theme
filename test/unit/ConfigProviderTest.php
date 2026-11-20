@@ -14,12 +14,16 @@ declare(strict_types=1);
 
 namespace WebwareTest\Theme;
 
+use Laminas\View\ConfigProvider as LaminasViewConfigProvider;
 use Laminas\View\Helper\Asset;
 use Laminas\View\Resolver\AggregateResolver;
+use Mezzio\LaminasView\ConfigProvider as MezzioLaminasViewConfigProvider;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversMethod;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
+use Webware\ConfigManager\Attribute\LoadAfter;
 use Webware\Theme\ConfigProvider;
 use Webware\Theme\Resolver\Container\AggregateResolverFactory;
 use Webware\Theme\Resolver\Container\ThemeResolverFactory;
@@ -62,5 +66,17 @@ final class ConfigProviderTest extends TestCase
         ];
 
         static::assertSame($expected, new ConfigProvider()->__invoke());
+    }
+
+    #[Test]
+    public function requiresTheViewProvidersToMergeFirst(): void
+    {
+        $attribute = new ReflectionClass(ConfigProvider::class)->getAttributes(LoadAfter::class);
+
+        static::assertCount(1, $attribute);
+        static::assertSame(
+            [LaminasViewConfigProvider::class, MezzioLaminasViewConfigProvider::class],
+            $attribute[0]->newInstance()->providers,
+        );
     }
 }
