@@ -3,7 +3,7 @@
 `Webware\Theme\Resolver\ThemeResolver` is a `Laminas\View\Resolver\ResolverInterface`. It does one array
 lookup and never touches the filesystem:
 
-```
+```text
 maps[active][address]  ??  maps['default'][address]  ??  false
 ```
 
