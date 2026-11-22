@@ -4,7 +4,7 @@
 composer require webware/webware-theme
 ```
 
-Requires PHP `~8.4.1 || ~8.5.0`, `laminas/laminas-view` and `mezzio/mezzio-laminasviewrenderer`.
+Requires PHP `~8.4.1 || ~8.5.0 || ~8.6.0`, `laminas/laminas-view` and `mezzio/mezzio-laminasviewrenderer`.
 
 ## Register the config provider
 
