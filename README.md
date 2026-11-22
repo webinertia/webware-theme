@@ -15,41 +15,41 @@ single array read, with no filesystem walk.
 
 1. Install it and register the provider **after** `Mezzio\LaminasView\ConfigProvider`:
 
-```bash
-composer require webware/webware-theme
-```
+   ```bash
+   composer require webware/webware-theme
+   ```
 
-```php
-Mezzio\LaminasView\ConfigProvider::class,
-Webware\Theme\ConfigProvider::class,
-```
+   ```php
+   Mezzio\LaminasView\ConfigProvider::class,
+   Webware\Theme\ConfigProvider::class,
+   ```
 
 2. Describe a theme in any autoloaded config file, for example `config/autoload/theme.acme.global.php`:
 
-```php
-use Webware\Theme\ConfigProvider;
+   ```php
+   use Webware\Theme\ConfigProvider;
 
-return [
-    ConfigProvider::THEME => [
-        ConfigProvider::ACTIVE => 'acme',
-        ConfigProvider::THEMES => [
-            'acme' => [
-                // only the addresses this theme overrides
-                'layout::default' => __DIR__ . '/../../templates/acme/layout/default.phtml',
-            ],
-        ],
-        ConfigProvider::ASSETS => [
-            'acme' => ['theme.css' => 'css/acme.css'],
-        ],
-    ],
-];
-```
+   return [
+       ConfigProvider::THEME => [
+           ConfigProvider::ACTIVE => 'acme',
+           ConfigProvider::THEMES => [
+               'acme' => [
+                   // only the addresses this theme overrides
+                   'layout::default' => __DIR__ . '/../../templates/acme/layout/default.phtml',
+               ],
+           ],
+           ConfigProvider::ASSETS => [
+               'acme' => ['theme.css' => 'css/acme.css'],
+           ],
+       ],
+   ];
+   ```
 
 3. Put the asset file at `public/theme/acme/css/acme.css`, and use it in a template:
 
-```php
-<link rel="stylesheet" href="<?= $this->asset('theme.css') ?>">
-```
+   ```php
+   <link rel="stylesheet" href="<?= $this->asset('theme.css') ?>">
+   ```
 
 `layout::default` now comes from the `acme` theme and every other address from `default`;
 `asset('theme.css')` returns `/theme/acme/css/acme.css`, and a name `acme` does not define falls back to the

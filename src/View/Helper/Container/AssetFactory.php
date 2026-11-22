@@ -62,7 +62,7 @@ final class AssetFactory
             str_starts_with($value, 'http://'),
             str_starts_with($value, '//'),
                 => $value,
-            default                                                                                                => self::URL_PREFIX
+            default => self::URL_PREFIX
                 . $theme
                 . '/'
                 . ltrim($value, characters: '/'),
